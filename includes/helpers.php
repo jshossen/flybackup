@@ -200,6 +200,35 @@ function auto_backup_time_ago($datetime) {
     }
 }
 
+function auto_backup_format_next_run($datetime) {
+    if (empty($datetime)) {
+        return 'Not scheduled';
+    }
+    
+    $timestamp = strtotime($datetime);
+    $diff = $timestamp - time();
+    
+    // If in the past, show as overdue
+    if ($diff < 0) {
+        return 'Overdue';
+    }
+    
+    // Format based on time until next run
+    if ($diff < 60) {
+        return 'In ' . $diff . ' seconds';
+    } elseif ($diff < 3600) {
+        return 'In ' . floor($diff / 60) . ' minutes';
+    } elseif ($diff < 86400) {
+        return 'In ' . floor($diff / 3600) . ' hours';
+    } elseif ($diff < 172800) { // Less than 2 days
+        return 'Tomorrow at ' . date('g:i A', $timestamp);
+    } elseif ($diff < 604800) { // Less than 7 days
+        return date('l \a\t g:i A', $timestamp); // e.g., "Monday at 2:00 PM"
+    } else {
+        return date('M j, Y \a\t g:i A', $timestamp); // e.g., "May 15, 2026 at 2:00 PM"
+    }
+}
+
 function auto_backup_verify_nonce($nonce, $action = 'auto_backup_nonce') {
     return wp_verify_nonce($nonce, $action);
 }

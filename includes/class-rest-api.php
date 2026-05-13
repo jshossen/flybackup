@@ -226,7 +226,7 @@ class Auto_Backup_Rest_API {
         
         foreach ($schedules as &$schedule) {
             $schedule->included_items = json_decode($schedule->included_items, true);
-            $schedule->next_run_formatted = auto_backup_time_ago($schedule->next_run);
+            $schedule->next_run_formatted = auto_backup_format_next_run($schedule->next_run);
         }
         
         return new WP_REST_Response($schedules, 200);
@@ -248,9 +248,9 @@ class Auto_Backup_Rest_API {
     public function create_schedule($request) {
         $params = $request->get_json_params();
         
-        $name = isset($params['name']) ? sanitize_text_field($params['name']) : 'New Schedule';
+        $name = isset($params['schedule_name']) ? sanitize_text_field($params['schedule_name']) : 'New Schedule';
         $frequency = isset($params['frequency']) ? sanitize_text_field($params['frequency']) : 'daily';
-        $type = isset($params['type']) ? sanitize_text_field($params['type']) : 'full';
+        $type = isset($params['backup_type']) ? sanitize_text_field($params['backup_type']) : 'full';
         $items = isset($params['items']) ? array_map('sanitize_text_field', $params['items']) : array();
         
         $result = $this->scheduler->create_schedule($name, $frequency, $type, $items);
