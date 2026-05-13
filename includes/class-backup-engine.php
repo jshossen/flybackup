@@ -123,22 +123,43 @@ class Auto_Backup_Backup_Engine {
         $sql_file = 'database.sql';
         $sql_content = '';
         
+        // Add header with important SQL settings
         $sql_content .= "-- WordPress Database Backup\n";
-        $sql_content .= "-- Generated: " . date('Y-m-d H:i:s') . "\n\n";
+        $sql_content .= "-- Generated: " . date('Y-m-d H:i:s') . "\n";
+        $sql_content .= "-- MySQL Version: " . $wpdb->db_version() . "\n\n";
+        $sql_content .= "SET SQL_MODE = \"NO_AUTO_VALUE_ON_ZERO\";\n";
+        $sql_content .= "SET FOREIGN_KEY_CHECKS = 0;\n";
+        $sql_content .= "SET time_zone = \"+00:00\";\n\n";
         
         $tables = $wpdb->get_results('SHOW TABLES', ARRAY_N);
         
         foreach ($tables as $table) {
             $table_name = $table[0];
             
+            // Get CREATE TABLE statement
             $create_table = $wpdb->get_row("SHOW CREATE TABLE `{$table_name}`", ARRAY_N);
-            $sql_content .= "\n\n-- Table: {$table_name}\n";
+            
+            $sql_content .= "\n-- --------------------------------------------------------\n";
+            $sql_content .= "-- Table structure for table `{$table_name}`\n";
+            $sql_content .= "-- --------------------------------------------------------\n\n";
             $sql_content .= "DROP TABLE IF EXISTS `{$table_name}`;\n";
             $sql_content .= $create_table[1] . ";\n\n";
             
+            // Get table data
             $rows = $wpdb->get_results("SELECT * FROM `{$table_name}`", ARRAY_A);
             
             if (!empty($rows)) {
+                $sql_content .= "-- Dumping data for table `{$table_name}`\n\n";
+                
+                // Get column names for explicit INSERT
+                $columns = array_keys($rows[0]);
+                $column_list = '`' . implode('`, `', $columns) . '`';
+                
+                // Insert in batches for better performance
+                $batch_size = 100;
+                $batch_count = 0;
+                $insert_values = array();
+                
                 foreach ($rows as $row) {
                     $values = array();
                     foreach ($row as $value) {
@@ -148,10 +169,25 @@ class Auto_Backup_Backup_Engine {
                             $values[] = "'" . $wpdb->_real_escape($value) . "'";
                         }
                     }
-                    $sql_content .= "INSERT INTO `{$table_name}` VALUES (" . implode(', ', $values) . ");\n";
+                    
+                    $insert_values[] = '(' . implode(', ', $values) . ')';
+                    $batch_count++;
+                    
+                    // Write batch when size is reached or last row
+                    if ($batch_count >= $batch_size || $row === end($rows)) {
+                        $sql_content .= "INSERT INTO `{$table_name}` ({$column_list}) VALUES\n";
+                        $sql_content .= implode(",\n", $insert_values) . ";\n";
+                        $insert_values = array();
+                        $batch_count = 0;
+                    }
                 }
+                
+                $sql_content .= "\n";
             }
         }
+        
+        // Re-enable foreign key checks
+        $sql_content .= "\nSET FOREIGN_KEY_CHECKS = 1;\n";
         
         $this->zip_manager->add_from_string($sql_file, $sql_content);
         

@@ -142,23 +142,114 @@ class Auto_Backup_Restore_Engine {
             throw new Exception('Database backup file is empty');
         }
         
-        $queries = explode(";\n", $sql_content);
+        $this->logger->info('Starting database restore', $backup_id);
         
-        foreach ($queries as $query) {
-            $query = trim($query);
+        // Define plugin tables that should NOT be restored (to preserve current backups and logs)
+        $plugin_tables = array(
+            $wpdb->prefix . 'ab_backups',
+            $wpdb->prefix . 'ab_logs',
+            $wpdb->prefix . 'ab_schedules'
+        );
+        
+        // Remove comments and split into individual statements
+        $lines = explode("\n", $sql_content);
+        $query = '';
+        $queries_executed = 0;
+        $queries_failed = 0;
+        $queries_skipped = 0;
+        $skip_current_table = false;
+        $current_table = '';
+        
+        foreach ($lines as $line) {
+            $line = trim($line);
             
-            if (empty($query) || strpos($query, '--') === 0) {
+            // Skip empty lines and comments
+            if (empty($line) || substr($line, 0, 2) === '--') {
                 continue;
             }
             
-            $result = $wpdb->query($query);
+            // Check if this is a DROP TABLE or CREATE TABLE statement for plugin tables
+            if (preg_match('/DROP TABLE IF EXISTS `([^`]+)`/', $line, $matches)) {
+                $table_name = $matches[1];
+                if (in_array($table_name, $plugin_tables)) {
+                    $skip_current_table = true;
+                    $current_table = $table_name;
+                    $this->logger->info("Skipping plugin table: {$table_name}", $backup_id);
+                    continue;
+                }
+            }
             
-            if ($result === false && !empty($wpdb->last_error)) {
-                $this->logger->warning('Database query warning: ' . $wpdb->last_error, $backup_id);
+            if (preg_match('/CREATE TABLE `([^`]+)`/', $line, $matches)) {
+                $table_name = $matches[1];
+                if (in_array($table_name, $plugin_tables)) {
+                    $skip_current_table = true;
+                    $current_table = $table_name;
+                    continue;
+                }
+            }
+            
+            if (preg_match('/INSERT INTO `([^`]+)`/', $line, $matches)) {
+                $table_name = $matches[1];
+                if (in_array($table_name, $plugin_tables)) {
+                    $skip_current_table = true;
+                    $current_table = $table_name;
+                }
+            }
+            
+            // If we're skipping this table, don't add to query
+            if ($skip_current_table) {
+                // Check if query is complete (ends with semicolon)
+                if (substr(trim($line), -1) === ';') {
+                    $queries_skipped++;
+                    $skip_current_table = false;
+                    $current_table = '';
+                }
+                continue;
+            }
+            
+            // Add line to current query
+            $query .= $line . ' ';
+            
+            // Check if query is complete (ends with semicolon)
+            if (substr(trim($line), -1) === ';') {
+                // Remove trailing semicolon and whitespace
+                $query = trim($query);
+                $query = substr($query, 0, -1);
+                
+                if (!empty($query)) {
+                    // Execute the query
+                    $result = $wpdb->query($query);
+                    
+                    if ($result === false) {
+                        if (!empty($wpdb->last_error)) {
+                            // Log the error with the query for debugging
+                            $this->logger->warning(
+                                'Query failed: ' . $wpdb->last_error . ' | Query: ' . substr($query, 0, 100) . '...', 
+                                $backup_id
+                            );
+                            $queries_failed++;
+                        }
+                    } else {
+                        $queries_executed++;
+                    }
+                }
+                
+                // Reset query for next statement
+                $query = '';
             }
         }
         
-        $this->logger->info('Database restored successfully', $backup_id);
+        $this->logger->info(
+            "Database restore completed. Executed: {$queries_executed}, Failed: {$queries_failed}, Skipped: {$queries_skipped}", 
+            $backup_id
+        );
+        
+        if ($queries_failed > 0) {
+            $this->logger->warning(
+                "Some queries failed during restore. Check logs for details.", 
+                $backup_id
+            );
+        }
         
         return true;
     }
