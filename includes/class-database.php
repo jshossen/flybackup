@@ -1,0 +1,287 @@
+<?php
+/**
+ * Database Manager
+ *
+ * @package Auto_Backup
+ */
+
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+class Auto_Backup_Database {
+    
+    const DB_VERSION = '1.0.0';
+    
+    public static function create_tables() {
+        global $wpdb;
+        
+        $charset_collate = $wpdb->get_charset_collate();
+        
+        $table_backups = $wpdb->prefix . 'ab_backups';
+        $table_logs = $wpdb->prefix . 'ab_logs';
+        $table_schedules = $wpdb->prefix . 'ab_schedules';
+        
+        $sql_backups = "CREATE TABLE IF NOT EXISTS {$table_backups} (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            backup_name varchar(255) NOT NULL,
+            backup_type enum('full','partial','database') NOT NULL DEFAULT 'full',
+            backup_size bigint(20) DEFAULT 0,
+            created_at datetime NOT NULL,
+            storage_location varchar(500) DEFAULT NULL,
+            status enum('pending','in_progress','completed','failed') NOT NULL DEFAULT 'pending',
+            duration int(11) DEFAULT 0,
+            included_items text DEFAULT NULL,
+            error_message text DEFAULT NULL,
+            PRIMARY KEY (id),
+            KEY status (status),
+            KEY created_at (created_at)
+        ) {$charset_collate};";
+        
+        $sql_logs = "CREATE TABLE IF NOT EXISTS {$table_logs} (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            backup_id bigint(20) DEFAULT NULL,
+            log_type enum('info','warning','error','success') NOT NULL DEFAULT 'info',
+            message text NOT NULL,
+            created_at datetime NOT NULL,
+            metadata text DEFAULT NULL,
+            PRIMARY KEY (id),
+            KEY backup_id (backup_id),
+            KEY log_type (log_type),
+            KEY created_at (created_at)
+        ) {$charset_collate};";
+        
+        $sql_schedules = "CREATE TABLE IF NOT EXISTS {$table_schedules} (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            schedule_name varchar(255) NOT NULL,
+            frequency enum('hourly','daily','weekly','monthly') NOT NULL DEFAULT 'daily',
+            backup_type enum('full','partial','database') NOT NULL DEFAULT 'full',
+            included_items text DEFAULT NULL,
+            next_run datetime DEFAULT NULL,
+            last_run datetime DEFAULT NULL,
+            status enum('active','paused') NOT NULL DEFAULT 'active',
+            created_at datetime NOT NULL,
+            PRIMARY KEY (id),
+            KEY status (status),
+            KEY next_run (next_run)
+        ) {$charset_collate};";
+        
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+        dbDelta($sql_backups);
+        dbDelta($sql_logs);
+        dbDelta($sql_schedules);
+        
+        add_option('auto_backup_db_version', self::DB_VERSION);
+    }
+    
+    public function get_backups($args = array()) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'ab_backups';
+        
+        $defaults = array(
+            'limit' => 20,
+            'offset' => 0,
+            'orderby' => 'created_at',
+            'order' => 'DESC',
+            'status' => null,
+            'type' => null
+        );
+        
+        $args = wp_parse_args($args, $defaults);
+        
+        $where = array('1=1');
+        
+        if ($args['status']) {
+            $where[] = $wpdb->prepare('status = %s', $args['status']);
+        }
+        
+        if ($args['type']) {
+            $where[] = $wpdb->prepare('backup_type = %s', $args['type']);
+        }
+        
+        $where_clause = implode(' AND ', $where);
+        
+        $query = "SELECT * FROM {$table} WHERE {$where_clause} ORDER BY {$args['orderby']} {$args['order']} LIMIT {$args['limit']} OFFSET {$args['offset']}";
+        
+        return $wpdb->get_results($query);
+    }
+    
+    public function get_backup($id) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'ab_backups';
+        
+        return $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE id = %d", $id));
+    }
+    
+    public function create_backup($data) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'ab_backups';
+        
+        $defaults = array(
+            'backup_name' => 'backup_' . date('Y-m-d_H-i-s'),
+            'backup_type' => 'full',
+            'backup_size' => 0,
+            'created_at' => current_time('mysql'),
+            'status' => 'pending',
+            'included_items' => null
+        );
+        
+        $data = wp_parse_args($data, $defaults);
+        
+        if (is_array($data['included_items'])) {
+            $data['included_items'] = json_encode($data['included_items']);
+        }
+        
+        $wpdb->insert($table, $data);
+        
+        return $wpdb->insert_id;
+    }
+    
+    public function update_backup($id, $data) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'ab_backups';
+        
+        if (isset($data['included_items']) && is_array($data['included_items'])) {
+            $data['included_items'] = json_encode($data['included_items']);
+        }
+        
+        return $wpdb->update($table, $data, array('id' => $id));
+    }
+    
+    public function delete_backup($id) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'ab_backups';
+        
+        return $wpdb->delete($table, array('id' => $id));
+    }
+    
+    public function get_logs($args = array()) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'ab_logs';
+        
+        $defaults = array(
+            'limit' => 100,
+            'offset' => 0,
+            'backup_id' => null,
+            'log_type' => null
+        );
+        
+        $args = wp_parse_args($args, $defaults);
+        
+        $where = array('1=1');
+        
+        if ($args['backup_id']) {
+            $where[] = $wpdb->prepare('backup_id = %d', $args['backup_id']);
+        }
+        
+        if ($args['log_type']) {
+            $where[] = $wpdb->prepare('log_type = %s', $args['log_type']);
+        }
+        
+        $where_clause = implode(' AND ', $where);
+        
+        $query = "SELECT * FROM {$table} WHERE {$where_clause} ORDER BY created_at DESC LIMIT {$args['limit']} OFFSET {$args['offset']}";
+        
+        return $wpdb->get_results($query);
+    }
+    
+    public function add_log($data) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'ab_logs';
+        
+        $defaults = array(
+            'backup_id' => null,
+            'log_type' => 'info',
+            'message' => '',
+            'created_at' => current_time('mysql'),
+            'metadata' => null
+        );
+        
+        $data = wp_parse_args($data, $defaults);
+        
+        if (is_array($data['metadata'])) {
+            $data['metadata'] = json_encode($data['metadata']);
+        }
+        
+        return $wpdb->insert($table, $data);
+    }
+    
+    public function get_schedules($status = null) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'ab_schedules';
+        
+        if ($status) {
+            return $wpdb->get_results($wpdb->prepare("SELECT * FROM {$table} WHERE status = %s ORDER BY created_at DESC", $status));
+        }
+        
+        return $wpdb->get_results("SELECT * FROM {$table} ORDER BY created_at DESC");
+    }
+    
+    public function get_schedule($id) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'ab_schedules';
+        
+        return $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE id = %d", $id));
+    }
+    
+    public function create_schedule($data) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'ab_schedules';
+        
+        $defaults = array(
+            'schedule_name' => 'Schedule ' . date('Y-m-d H:i:s'),
+            'frequency' => 'daily',
+            'backup_type' => 'full',
+            'status' => 'active',
+            'created_at' => current_time('mysql')
+        );
+        
+        $data = wp_parse_args($data, $defaults);
+        
+        if (is_array($data['included_items'])) {
+            $data['included_items'] = json_encode($data['included_items']);
+        }
+        
+        $wpdb->insert($table, $data);
+        
+        return $wpdb->insert_id;
+    }
+    
+    public function update_schedule($id, $data) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'ab_schedules';
+        
+        if (isset($data['included_items']) && is_array($data['included_items'])) {
+            $data['included_items'] = json_encode($data['included_items']);
+        }
+        
+        return $wpdb->update($table, $data, array('id' => $id));
+    }
+    
+    public function delete_schedule($id) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'ab_schedules';
+        
+        return $wpdb->delete($table, array('id' => $id));
+    }
+    
+    public function get_total_backup_size() {
+        global $wpdb;
+        $table = $wpdb->prefix . 'ab_backups';
+        
+        $result = $wpdb->get_var("SELECT SUM(backup_size) FROM {$table} WHERE status = 'completed'");
+        
+        return $result ? (int) $result : 0;
+    }
+    
+    public function get_backup_count($status = null) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'ab_backups';
+        
+        if ($status) {
+            return (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$table} WHERE status = %s", $status));
+        }
+        
+        return (int) $wpdb->get_var("SELECT COUNT(*) FROM {$table}");
+    }
+}

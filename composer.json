@@ -1,0 +1,22 @@
+{
+    "name": "auto-backup/wordpress-plugin",
+    "description": "Automatic WordPress backups that just work",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Your Name",
+            "email": "your.email@example.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.4"
+    },
+    "autoload": {
+        "classmap": [
+            "includes/",
+            "admin/",
+            "pro/"
+        ]
+    }
+}
