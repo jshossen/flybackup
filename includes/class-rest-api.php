@@ -18,6 +18,7 @@ class Auto_Backup_Rest_API {
     private $scheduler;
     private $health_check;
     private $logger;
+    private $comparison;
     
     public function __construct() {
         $this->database = new Auto_Backup_Database();
@@ -26,6 +27,7 @@ class Auto_Backup_Rest_API {
         $this->scheduler = new Auto_Backup_Scheduler();
         $this->health_check = new Auto_Backup_Health_Check();
         $this->logger = new Auto_Backup_Logger();
+        $this->comparison = new Auto_Backup_Comparison();
         
         add_action('rest_api_init', array($this, 'register_routes'));
     }
@@ -128,6 +130,31 @@ class Auto_Backup_Rest_API {
         register_rest_route($this->namespace, '/stats', array(
             'methods' => 'GET',
             'callback' => array($this, 'get_stats'),
+            'permission_callback' => array($this, 'check_permission')
+        ));
+        
+        // Backup comparison endpoints
+        register_rest_route($this->namespace, '/backups/(?P<id>\d+)/details', array(
+            'methods' => 'GET',
+            'callback' => array($this, 'get_backup_details'),
+            'permission_callback' => array($this, 'check_permission')
+        ));
+        
+        register_rest_route($this->namespace, '/backups/(?P<id>\d+)/compare/current', array(
+            'methods' => 'GET',
+            'callback' => array($this, 'compare_current_vs_backup'),
+            'permission_callback' => array($this, 'check_permission')
+        ));
+        
+        register_rest_route($this->namespace, '/backups/compare', array(
+            'methods' => 'POST',
+            'callback' => array($this, 'compare_backup_vs_backup'),
+            'permission_callback' => array($this, 'check_permission')
+        ));
+        
+        register_rest_route($this->namespace, '/backups/(?P<id>\d+)/tables/(?P<table>[a-zA-Z0-9_]+)/diff', array(
+            'methods' => 'GET',
+            'callback' => array($this, 'get_table_diff'),
             'permission_callback' => array($this, 'check_permission')
         ));
     }
@@ -367,8 +394,62 @@ class Auto_Backup_Rest_API {
             'next_scheduled' => $next_scheduled ? array(
                 'name' => $next_scheduled->schedule_name,
                 'date' => $next_scheduled->next_run,
-                'time_until' => auto_backup_time_ago($next_scheduled->next_run)
+                'time_until' => auto_backup_format_next_run($next_scheduled->next_run)
             ) : null
         ), 200);
+    }
+    
+    // Comparison methods
+    public function get_backup_details($request) {
+        $id = $request['id'];
+        $details = $this->comparison->get_backup_details($id);
+        
+        if (isset($details['error'])) {
+            return new WP_Error('details_failed', $details['error'], array('status' => 422));
+        }
+        
+        return new WP_REST_Response($details, 200);
+    }
+    
+    public function compare_current_vs_backup($request) {
+        $id = $request['id'];
+        $result = $this->comparison->compare_current_vs_backup($id);
+        
+        if (isset($result['error'])) {
+            return new WP_Error('compare_failed', $result['error'], array('status' => 422));
+        }
+        
+        return new WP_REST_Response($result, 200);
+    }
+    
+    public function compare_backup_vs_backup($request) {
+        $params = $request->get_json_params();
+        
+        $source_id = isset($params['source_id']) ? intval($params['source_id']) : 0;
+        $target_id = isset($params['target_id']) ? intval($params['target_id']) : 0;
+        
+        if (!$source_id || !$target_id) {
+            return new WP_Error('invalid_params', 'Source and target backup IDs are required', array('status' => 400));
+        }
+        
+        $result = $this->comparison->compare_backup_vs_backup($source_id, $target_id);
+        
+        if (isset($result['error'])) {
+            return new WP_Error('compare_failed', $result['error'], array('status' => 422));
+        }
+        
+        return new WP_REST_Response($result, 200);
+    }
+    
+    public function get_table_diff($request) {
+        $id = $request['id'];
+        $table = $request['table'];
+        
+        $source_backup_id = isset($_GET['source_backup_id']) ? intval($_GET['source_backup_id']) : 0;
+        $target_backup_id = isset($_GET['target_backup_id']) ? intval($_GET['target_backup_id']) : $id;
+        
+        $result = $this->comparison->get_table_diff($table, $source_backup_id, $target_backup_id);
+        
+        return new WP_REST_Response($result, 200);
     }
 }

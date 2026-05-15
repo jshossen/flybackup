@@ -56,6 +56,15 @@ class Auto_Backup_Admin_Menu {
         
         add_submenu_page(
             'auto-backup',
+            __('Backup Details', 'auto-backup'),
+            null,
+            'manage_options',
+            'auto-backup-backup-details',
+            array($this, 'render_page')
+        );
+        
+        add_submenu_page(
+            'auto-backup',
             __('Schedules', 'auto-backup'),
             __('Schedules', 'auto-backup'),
             'manage_options',
@@ -69,6 +78,15 @@ class Auto_Backup_Admin_Menu {
             __('Settings', 'auto-backup'),
             'manage_options',
             'auto-backup-settings',
+            array($this, 'render_page')
+        );
+        
+        add_submenu_page(
+            'auto-backup',
+            __('Compare', 'auto-backup'),
+            __('Compare', 'auto-backup'),
+            'manage_options',
+            'auto-backup-compare',
             array($this, 'render_page')
         );
         

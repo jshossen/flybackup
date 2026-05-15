@@ -85,3 +85,29 @@ export const updateSettings = async (data) => {
 export const getStats = async () => {
     return await apiFetch({ path: `/${API_NAMESPACE}/stats` });
 };
+
+export const getBackupDetails = async (id) => {
+    return await apiFetch({ path: `/${API_NAMESPACE}/backups/${id}/details` });
+};
+
+export const compareCurrentVsBackup = async (id) => {
+    return await apiFetch({ path: `/${API_NAMESPACE}/backups/${id}/compare/current` });
+};
+
+export const compareBackupVsBackup = async (sourceId, targetId) => {
+    return await apiFetch({
+        path: `/${API_NAMESPACE}/backups/compare`,
+        method: 'POST',
+        data: { source_id: sourceId, target_id: targetId }
+    });
+};
+
+export const getTableDiff = async (backupId, table, sourceBackupId = 0, targetBackupId = null) => {
+    const params = new URLSearchParams();
+    if (sourceBackupId) params.append('source_backup_id', sourceBackupId);
+    if (targetBackupId) params.append('target_backup_id', targetBackupId);
+    
+    return await apiFetch({ 
+        path: `/${API_NAMESPACE}/backups/${backupId}/tables/${table}/diff?${params.toString()}` 
+    });
+};

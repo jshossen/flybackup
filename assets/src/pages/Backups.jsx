@@ -112,22 +112,28 @@ const Backups = () => {
                                     </span>
                                 </td>
                                 <td>
-                                    <div style={{display: 'flex', gap: '8px'}}>
-                                        <Button
-                                            variant="secondary"
-                                            size="small"
-                                            icon={<span className="dashicons dashicons-download"></span>}
+                                    <div className="backup-actions">
+                                        <a 
+                                            href={`?page=auto-backup-backup-details&backup_id=${backup.id}`}
+                                            className="button button-small action-details"
+                                            title="View Details"
+                                        >
+                                            Details
+                                        </a>
+                                        <button
+                                            className="button button-small action-download"
+                                            title="Download"
                                             onClick={() => handleDownload(backup)}
                                         >
-                                            Download
-                                        </Button>
-                                        <Button
-                                            variant="danger"
-                                            size="small"
+                                            <span className="dashicons dashicons-download"></span>
+                                        </button>
+                                        <button
+                                            className="button button-small action-delete"
+                                            title="Delete"
                                             onClick={() => handleDelete(backup.id)}
                                         >
-                                            Delete
-                                        </Button>
+                                            <span className="dashicons dashicons-trash"></span>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>

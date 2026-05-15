@@ -22,6 +22,7 @@ final class Auto_Backup {
     public $health_check;
     public $ajax_handler;
     public $rest_api;
+    public $comparison;
     
     public static function instance() {
         if (is_null(self::$instance)) {
@@ -46,6 +47,7 @@ final class Auto_Backup {
         require_once AUTO_BACKUP_PLUGIN_DIR . 'includes/class-health-check.php';
         require_once AUTO_BACKUP_PLUGIN_DIR . 'includes/class-ajax-handler.php';
         require_once AUTO_BACKUP_PLUGIN_DIR . 'includes/class-rest-api.php';
+        require_once AUTO_BACKUP_PLUGIN_DIR . 'includes/class-backup-comparison.php';
         require_once AUTO_BACKUP_PLUGIN_DIR . 'includes/helpers.php';
         
         require_once AUTO_BACKUP_PLUGIN_DIR . 'admin/class-admin-menu.php';
@@ -71,6 +73,7 @@ final class Auto_Backup {
         $this->health_check = new Auto_Backup_Health_Check();
         $this->ajax_handler = new Auto_Backup_Ajax_Handler();
         $this->rest_api = new Auto_Backup_Rest_API();
+        $this->comparison = new Auto_Backup_Comparison();
         
         if (is_admin()) {
             new Auto_Backup_Admin_Menu();

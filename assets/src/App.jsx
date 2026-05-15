@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Dashboard from './pages/Dashboard';
 import Backups from './pages/Backups';
+import BackupDetails from './pages/BackupDetails';
+import Compare from './pages/Compare';
 import Restore from './pages/Restore';
 import Schedules from './pages/Schedules';
 import Settings from './pages/Settings';
@@ -16,7 +18,15 @@ const App = () => {
     }, []);
 
     const renderPage = () => {
-        switch (currentPage) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const page = urlParams.get('page');
+        const backupId = urlParams.get('backup_id');
+        
+        switch (page || currentPage) {
+            case 'auto-backup-backup-details':
+                return backupId ? <BackupDetails /> : <Backups />;
+            case 'auto-backup-compare':
+                return <Compare />;
             case 'auto-backup-backups':
                 return <Backups />;
             case 'auto-backup-restore':
@@ -65,6 +75,12 @@ const App = () => {
                         <a href="?page=auto-backup-settings">
                             <span className="dashicons dashicons-admin-settings"></span>
                             Settings
+                        </a>
+                    </li>
+                    <li className={currentPage === 'auto-backup-compare' ? 'active' : ''}>
+                        <a href="?page=auto-backup-compare">
+                            <span className="dashicons dashicons-image-flip-horizontal"></span>
+                            Compare
                         </a>
                     </li>
                     <li className={currentPage === 'auto-backup-logs' ? 'active' : ''}>
