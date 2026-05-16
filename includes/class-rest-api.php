@@ -266,8 +266,9 @@ class Auto_Backup_Rest_API {
         $id = $request['id'];
         $params = $request->get_json_params();
         $items = isset($params['items']) ? array_map('sanitize_text_field', $params['items']) : array();
+        $confirm_wp_config = !empty($params['confirm_wp_config']);
         
-        $result = $this->restore_engine->restore_backup($id, $items);
+        $result = $this->restore_engine->restore_backup($id, $items, $confirm_wp_config);
         
         if ($result['success']) {
             return new WP_REST_Response($result, 200);

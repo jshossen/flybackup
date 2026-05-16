@@ -69,13 +69,14 @@ class Auto_Backup_Ajax_Handler {
         
         $backup_id = isset($_POST['backup_id']) ? intval($_POST['backup_id']) : 0;
         $items = isset($_POST['items']) ? array_map('sanitize_text_field', $_POST['items']) : array();
+        $confirm_wp_config = !empty($_POST['confirm_wp_config']);
         
         if (!$backup_id) {
             wp_send_json_error(array('message' => 'Invalid backup ID'));
         }
         
         $restore_engine = new Auto_Backup_Restore_Engine();
-        $result = $restore_engine->restore_backup($backup_id, $items);
+        $result = $restore_engine->restore_backup($backup_id, $items, $confirm_wp_config);
         
         if ($result['success']) {
             wp_send_json_success($result);
