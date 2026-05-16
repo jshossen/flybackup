@@ -29,10 +29,6 @@ class Auto_Backup_Pro_Manager {
     }
     
     private function load_pro_features() {
-        if (file_exists(AUTO_BACKUP_PLUGIN_DIR . 'pro/cloud/class-cloud-base.php')) {
-            require_once AUTO_BACKUP_PLUGIN_DIR . 'pro/cloud/class-cloud-base.php';
-        }
-        
         if (file_exists(AUTO_BACKUP_PLUGIN_DIR . 'pro/migration/class-migration-tool.php')) {
             require_once AUTO_BACKUP_PLUGIN_DIR . 'pro/migration/class-migration-tool.php';
         }
@@ -47,10 +43,6 @@ class Auto_Backup_Pro_Manager {
     }
     
     public function add_cloud_storage_locations($locations) {
-        if (!$this->is_pro_active) {
-            return $locations;
-        }
-        
         $locations['google_drive'] = __('Google Drive', 'auto-backup');
         $locations['dropbox'] = __('Dropbox', 'auto-backup');
         $locations['amazon_s3'] = __('Amazon S3', 'auto-backup');

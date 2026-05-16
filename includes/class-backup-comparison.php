@@ -20,6 +20,42 @@ class Auto_Backup_Comparison {
     }
     
     /**
+     * Ensure backup file is available locally, downloading from cloud if needed
+     *
+     * @param object $backup Backup record
+     * @return string|false Local file path or false
+     */
+    private function ensure_backup_local($backup) {
+        if (file_exists($backup->storage_location)) {
+            return $backup->storage_location;
+        }
+        
+        // Try to download from cloud
+        if (!empty($backup->cloud_storage) && class_exists('Auto_Backup_Cloud_Manager')) {
+            $cloud_storage = json_decode($backup->cloud_storage, true);
+            if (!empty($cloud_storage['provider']) && !empty($cloud_storage['remote_path'])) {
+                $this->logger->info('Downloading backup from cloud for comparison: ' . $cloud_storage['provider']);
+                
+                $cloud_manager = new Auto_Backup_Cloud_Manager();
+                $result = $cloud_manager->download_backup(
+                    $cloud_storage['provider'],
+                    $cloud_storage['remote_path'],
+                    $backup->storage_location
+                );
+                
+                if ($result['success'] && file_exists($backup->storage_location)) {
+                    $this->logger->info('Backup downloaded from cloud successfully');
+                    return $backup->storage_location;
+                }
+                
+                $this->logger->warning('Failed to download backup from cloud: ' . $result['message']);
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
      * Get detailed information about a backup's contents
      *
      * @param int $backup_id Backup ID
@@ -33,8 +69,8 @@ class Auto_Backup_Comparison {
             return array('error' => 'Backup not found');
         }
         
-        $zip_path = $backup->storage_location;
-        $file_exists = file_exists($zip_path);
+        $zip_path = $this->ensure_backup_local($backup);
+        $file_exists = $zip_path !== false;
         
         $details = array(
             'backup_id' => $backup_id,
@@ -42,14 +78,15 @@ class Auto_Backup_Comparison {
             'backup_type' => $backup->backup_type,
             'created_at' => $backup->created_at,
             'file_size' => $this->format_file_size($backup->backup_size),
-            'file_path' => $zip_path,
+            'file_path' => $backup->storage_location,
             'file_exists' => $file_exists,
+            'cloud_storage' => $backup->cloud_storage ? json_decode($backup->cloud_storage, true) : null,
             'database' => array(),
             'files' => array()
         );
         
         if (!$file_exists) {
-            $details['warning'] = 'Backup ZIP file not found on disk. Only database record information is available.';
+            $details['warning'] = 'Backup ZIP file not found on disk or cloud. Only database record information is available.';
             return $details;
         }
         
@@ -79,10 +116,10 @@ class Auto_Backup_Comparison {
             return array('error' => 'Backup not found');
         }
         
-        $zip_path = $backup->storage_location;
-        if (!file_exists($zip_path)) {
+        $zip_path = $this->ensure_backup_local($backup);
+        if (!$zip_path) {
             return array(
-                'error' => 'Backup file not found',
+                'error' => 'Backup file not found locally or in cloud',
                 'mode' => 'current_vs_backup',
                 'backup_id' => $backup_id,
                 'summary' => array(
@@ -208,8 +245,11 @@ class Auto_Backup_Comparison {
         if (!$source) return array('error' => 'Source backup not found');
         if (!$target) return array('error' => 'Target backup not found');
         
-        if (!file_exists($source->storage_location)) return array('error' => 'Source backup file not found');
-        if (!file_exists($target->storage_location)) return array('error' => 'Target backup file not found');
+        $source_zip = $this->ensure_backup_local($source);
+        $target_zip = $this->ensure_backup_local($target);
+        
+        if (!$source_zip) return array('error' => 'Source backup file not found locally or in cloud');
+        if (!$target_zip) return array('error' => 'Target backup file not found locally or in cloud');
         
         $result = array(
             'mode' => 'backup_vs_backup',
@@ -230,8 +270,8 @@ class Auto_Backup_Comparison {
         );
         
         // Get database structures from both backups
-        $source_sql = $this->extract_sql_from_zip($source->storage_location);
-        $target_sql = $this->extract_sql_from_zip($target->storage_location);
+        $source_sql = $this->extract_sql_from_zip($source_zip);
+        $target_sql = $this->extract_sql_from_zip($target_zip);
         
         $source_tables = $source_sql ? $this->parse_sql_structure($source_sql) : array();
         $target_tables = $target_sql ? $this->parse_sql_structure($target_sql) : array();
@@ -289,7 +329,7 @@ class Auto_Backup_Comparison {
         }
         
         // Compare files
-        $result['files'] = $this->compare_backup_files($source->storage_location, $target->storage_location);
+        $result['files'] = $this->compare_backup_files($source_zip, $target_zip);
         
         // Update summary
         foreach ($result['files'] as $file) {

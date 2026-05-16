@@ -157,6 +157,37 @@ class Auto_Backup_Rest_API {
             'callback' => array($this, 'get_table_diff'),
             'permission_callback' => array($this, 'check_permission')
         ));
+        
+        // Cloud storage endpoints
+        register_rest_route($this->namespace, '/cloud/status', array(
+            'methods' => 'GET',
+            'callback' => array($this, 'get_cloud_status'),
+            'permission_callback' => array($this, 'check_permission')
+        ));
+        
+        register_rest_route($this->namespace, '/cloud/connect', array(
+            'methods' => 'POST',
+            'callback' => array($this, 'connect_cloud_provider'),
+            'permission_callback' => array($this, 'check_permission')
+        ));
+        
+        register_rest_route($this->namespace, '/cloud/disconnect/(?P<provider>[a-z_]+)', array(
+            'methods' => 'DELETE',
+            'callback' => array($this, 'disconnect_cloud_provider'),
+            'permission_callback' => array($this, 'check_permission')
+        ));
+        
+        register_rest_route($this->namespace, '/cloud/upload/(?P<backup_id>\d+)', array(
+            'methods' => 'POST',
+            'callback' => array($this, 'upload_backup_to_cloud'),
+            'permission_callback' => array($this, 'check_permission')
+        ));
+        
+        register_rest_route($this->namespace, '/cloud/download/(?P<backup_id>\d+)', array(
+            'methods' => 'POST',
+            'callback' => array($this, 'download_backup_from_cloud'),
+            'permission_callback' => array($this, 'check_permission')
+        ));
     }
     
     public function check_permission() {
@@ -180,6 +211,7 @@ class Auto_Backup_Rest_API {
             $backup->included_items = json_decode($backup->included_items, true);
             $backup->size_formatted = auto_backup_format_bytes($backup->backup_size);
             $backup->time_ago = auto_backup_time_ago($backup->created_at);
+            $backup->cloud_storage = $backup->cloud_storage ? json_decode($backup->cloud_storage, true) : null;
         }
         
         return new WP_REST_Response(array(
@@ -199,6 +231,7 @@ class Auto_Backup_Rest_API {
         $backup->included_items = json_decode($backup->included_items, true);
         $backup->size_formatted = auto_backup_format_bytes($backup->backup_size);
         $backup->time_ago = auto_backup_time_ago($backup->created_at);
+        $backup->cloud_storage = $backup->cloud_storage ? json_decode($backup->cloud_storage, true) : null;
         
         return new WP_REST_Response($backup, 200);
     }
@@ -451,5 +484,117 @@ class Auto_Backup_Rest_API {
         $result = $this->comparison->get_table_diff($table, $source_backup_id, $target_backup_id);
         
         return new WP_REST_Response($result, 200);
+    }
+    
+    // Cloud storage methods
+    public function get_cloud_status($request) {
+        $cloud_manager = new Auto_Backup_Cloud_Manager();
+        $status = $cloud_manager->get_all_providers_status();
+        
+        return new WP_REST_Response($status, 200);
+    }
+    
+    public function connect_cloud_provider($request) {
+        $params = $request->get_json_params();
+        
+        $provider = isset($params['provider']) ? sanitize_text_field($params['provider']) : '';
+        $credentials = isset($params['credentials']) ? $params['credentials'] : array();
+        $settings = isset($params['settings']) ? $params['settings'] : array();
+        
+        if (!$provider || empty($credentials)) {
+            return new WP_Error('invalid_params', 'Provider and credentials are required', array('status' => 400));
+        }
+        
+        $cloud_manager = new Auto_Backup_Cloud_Manager();
+        $result = $cloud_manager->connect_provider($provider, $credentials, $settings);
+        
+        if ($result['success']) {
+            return new WP_REST_Response($result, 200);
+        }
+        
+        return new WP_Error('connection_failed', $result['message'], array('status' => 400));
+    }
+    
+    public function disconnect_cloud_provider($request) {
+        $provider = $request['provider'];
+        
+        $cloud_manager = new Auto_Backup_Cloud_Manager();
+        $result = $cloud_manager->disconnect_provider($provider);
+        
+        return new WP_REST_Response($result, 200);
+    }
+    
+    public function upload_backup_to_cloud($request) {
+        $backup_id = $request['backup_id'];
+        $params = $request->get_json_params();
+        $provider = isset($params['provider']) ? sanitize_text_field($params['provider']) : '';
+        
+        if (!$provider) {
+            return new WP_Error('invalid_params', 'Provider is required', array('status' => 400));
+        }
+        
+        $backup = $this->database->get_backup($backup_id);
+        if (!$backup) {
+            return new WP_Error('backup_not_found', 'Backup not found', array('status' => 404));
+        }
+        
+        if (!file_exists($backup->storage_location)) {
+            return new WP_Error('file_not_found', 'Backup file not found', array('status' => 404));
+        }
+        
+        $cloud_manager = new Auto_Backup_Cloud_Manager();
+        $result = $cloud_manager->upload_backup($provider, $backup->storage_location);
+        
+        if ($result['success']) {
+            // Update backup record with cloud storage info
+            $cloud_storage = array(
+                'provider' => $provider,
+                'remote_path' => $result['remote_id'] ?? basename($backup->storage_location),
+                'uploaded_at' => current_time('mysql')
+            );
+            
+            $this->database->update_backup($backup_id, array(
+                'cloud_storage' => json_encode($cloud_storage)
+            ));
+            
+            return new WP_REST_Response($result, 200);
+        }
+        
+        return new WP_Error('upload_failed', $result['message'], array('status' => 500));
+    }
+    
+    public function download_backup_from_cloud($request) {
+        $backup_id = $request['backup_id'];
+        
+        $backup = $this->database->get_backup($backup_id);
+        if (!$backup) {
+            return new WP_Error('backup_not_found', 'Backup not found', array('status' => 404));
+        }
+        
+        if (!class_exists('Auto_Backup_Cloud_Manager')) {
+            return new WP_Error('cloud_not_available', 'Cloud storage not available', array('status' => 400));
+        }
+        
+        if (empty($backup->cloud_storage)) {
+            return new WP_Error('no_cloud_backup', 'Backup not stored in cloud', array('status' => 400));
+        }
+        
+        $cloud_storage = json_decode($backup->cloud_storage, true);
+        if (empty($cloud_storage['provider'])) {
+            return new WP_Error('invalid_cloud_data', 'Invalid cloud storage data', array('status' => 400));
+        }
+        
+        $cloud_manager = new Auto_Backup_Cloud_Manager();
+        $result = $cloud_manager->download_backup(
+            $cloud_storage['provider'],
+            $cloud_storage['remote_path'],
+            $backup->storage_location
+        );
+        
+        if ($result['success']) {
+            return new WP_REST_Response($result, 200);
+        }
+        
+        return new WP_Error('download_failed', $result['message'], array('status' => 500));
     }
 }

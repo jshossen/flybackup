@@ -86,6 +86,9 @@ class Auto_Backup_Backup_Engine {
             
             do_action('auto_backup_after_backup', $backup_id, $backup_path);
             
+            // Upload to cloud if configured
+            $this->upload_to_cloud($backup_id, $backup_path);
+            
             $this->cleanup_old_backups();
             
             $this->send_notification($backup_id, 'success');
@@ -401,5 +404,54 @@ class Auto_Backup_Backup_Engine {
         
         readfile($backup->storage_location);
         exit;
+    }
+    
+    private function upload_to_cloud($backup_id, $backup_path) {
+        if (!class_exists('Auto_Backup_Cloud_Manager')) {
+            return;
+        }
+        
+        $cloud_manager = new Auto_Backup_Cloud_Manager();
+        $providers = $cloud_manager->get_all_providers_status();
+        
+        // Find first connected provider
+        $connected_provider = null;
+        foreach ($providers as $provider => $status) {
+            if ($status['connected']) {
+                $connected_provider = $provider;
+                break;
+            }
+        }
+        
+        if (!$connected_provider) {
+            return;
+        }
+        
+        $this->logger->info('Uploading backup to cloud: ' . $connected_provider, $backup_id);
+        
+        $result = $cloud_manager->upload_backup($connected_provider, $backup_path);
+        
+        if ($result['success']) {
+            // Update backup record with cloud storage info
+            $cloud_storage = array(
+                'provider' => $connected_provider,
+                'remote_path' => $result['remote_id'] ?? basename($backup_path),
+                'uploaded_at' => current_time('mysql')
+            );
+            
+            $this->database->update_backup($backup_id, array(
+                'cloud_storage' => json_encode($cloud_storage)
+            ));
+            
+            $this->logger->success('Backup uploaded to cloud: ' . $connected_provider, $backup_id);
+            
+            // Delete local file after successful cloud upload (cloud-first strategy)
+            if (file_exists($backup_path)) {
+                @unlink($backup_path);
+                $this->logger->info('Local backup file deleted after cloud upload', $backup_id);
+            }
+        } else {
+            $this->logger->warning('Cloud upload failed: ' . $result['message'], $backup_id);
+        }
     }
 }

@@ -7,6 +7,7 @@ import Restore from './pages/Restore';
 import Schedules from './pages/Schedules';
 import Settings from './pages/Settings';
 import Logs from './pages/Logs';
+import CloudSettings from './pages/CloudSettings';
 
 const App = () => {
     const [currentPage, setCurrentPage] = useState('auto-backup');
@@ -35,6 +36,8 @@ const App = () => {
                 return <Schedules />;
             case 'auto-backup-settings':
                 return <Settings />;
+            case 'auto-backup-cloud':
+                return <CloudSettings />;
             case 'auto-backup-logs':
                 return <Logs />;
             case 'auto-backup':
@@ -81,6 +84,12 @@ const App = () => {
                         <a href="?page=auto-backup-compare">
                             <span className="dashicons dashicons-image-flip-horizontal"></span>
                             Compare
+                        </a>
+                    </li>
+                    <li className={currentPage === 'auto-backup-cloud' ? 'active' : ''}>
+                        <a href="?page=auto-backup-cloud">
+                            <span className="dashicons dashicons-cloud"></span>
+                            Cloud
                         </a>
                     </li>
                     <li className={currentPage === 'auto-backup-logs' ? 'active' : ''}>

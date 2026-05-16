@@ -92,6 +92,15 @@ class Auto_Backup_Admin_Menu {
         
         add_submenu_page(
             'auto-backup',
+            __('Cloud Storage', 'auto-backup'),
+            __('Cloud Storage', 'auto-backup'),
+            'manage_options',
+            'auto-backup-cloud',
+            array($this, 'render_page')
+        );
+        
+        add_submenu_page(
+            'auto-backup',
             __('Logs', 'auto-backup'),
             __('Logs', 'auto-backup'),
             'manage_options',

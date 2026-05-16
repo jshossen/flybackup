@@ -111,3 +111,31 @@ export const getTableDiff = async (backupId, table, sourceBackupId = 0, targetBa
         path: `/${API_NAMESPACE}/backups/${backupId}/tables/${table}/diff?${params.toString()}` 
     });
 };
+
+// Cloud storage API
+export const getCloudStatus = async () => {
+    return await apiFetch({ path: `/${API_NAMESPACE}/cloud/status` });
+};
+
+export const connectCloudProvider = async (provider, credentials, settings = {}) => {
+    return await apiFetch({
+        path: `/${API_NAMESPACE}/cloud/connect`,
+        method: 'POST',
+        data: { provider, credentials, settings }
+    });
+};
+
+export const disconnectCloudProvider = async (provider) => {
+    return await apiFetch({
+        path: `/${API_NAMESPACE}/cloud/disconnect/${provider}`,
+        method: 'DELETE'
+    });
+};
+
+export const uploadBackupToCloud = async (backupId, provider) => {
+    return await apiFetch({
+        path: `/${API_NAMESPACE}/cloud/upload/${backupId}`,
+        method: 'POST',
+        data: { provider }
+    });
+};

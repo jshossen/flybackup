@@ -96,6 +96,7 @@ const Backups = () => {
                             <th>Size</th>
                             <th>Date</th>
                             <th>Status</th>
+                            <th>Cloud</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -110,6 +111,15 @@ const Backups = () => {
                                     <span className={`status-badge status-${backup.status}`}>
                                         {backup.status}
                                     </span>
+                                </td>
+                                <td>
+                                    {backup.cloud_storage && (
+                                        <span 
+                                            className="dashicons dashicons-cloud" 
+                                            title={`Stored in ${backup.cloud_storage.provider}`}
+                                            style={{ color: '#46b450' }}
+                                        ></span>
+                                    )}
                                 </td>
                                 <td>
                                     <div className="backup-actions">

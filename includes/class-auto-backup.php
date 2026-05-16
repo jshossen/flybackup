@@ -53,6 +53,23 @@ final class Auto_Backup {
         require_once AUTO_BACKUP_PLUGIN_DIR . 'admin/class-admin-menu.php';
         require_once AUTO_BACKUP_PLUGIN_DIR . 'admin/class-dashboard-widget.php';
         
+        // Load cloud storage classes
+        if (file_exists(AUTO_BACKUP_PLUGIN_DIR . 'includes/cloud/class-cloud-base.php')) {
+            require_once AUTO_BACKUP_PLUGIN_DIR . 'includes/cloud/class-cloud-base.php';
+        }
+        if (file_exists(AUTO_BACKUP_PLUGIN_DIR . 'includes/cloud/class-cloud-manager.php')) {
+            require_once AUTO_BACKUP_PLUGIN_DIR . 'includes/cloud/class-cloud-manager.php';
+        }
+        if (file_exists(AUTO_BACKUP_PLUGIN_DIR . 'includes/cloud/class-google-drive.php')) {
+            require_once AUTO_BACKUP_PLUGIN_DIR . 'includes/cloud/class-google-drive.php';
+        }
+        if (file_exists(AUTO_BACKUP_PLUGIN_DIR . 'includes/cloud/class-dropbox.php')) {
+            require_once AUTO_BACKUP_PLUGIN_DIR . 'includes/cloud/class-dropbox.php';
+        }
+        if (file_exists(AUTO_BACKUP_PLUGIN_DIR . 'includes/cloud/class-amazon-s3.php')) {
+            require_once AUTO_BACKUP_PLUGIN_DIR . 'includes/cloud/class-amazon-s3.php';
+        }
+        
         if (file_exists(AUTO_BACKUP_PLUGIN_DIR . 'pro/class-pro-manager.php')) {
             require_once AUTO_BACKUP_PLUGIN_DIR . 'pro/class-pro-manager.php';
         }

@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
 
 class Auto_Backup_Database {
     
-    const DB_VERSION = '1.0.0';
+    const DB_VERSION = '1.1.0';
     
     public static function create_tables() {
         global $wpdb;
@@ -32,6 +32,7 @@ class Auto_Backup_Database {
             status enum('pending','in_progress','completed','failed') NOT NULL DEFAULT 'pending',
             duration int(11) DEFAULT 0,
             included_items text DEFAULT NULL,
+            cloud_storage text DEFAULT NULL,
             error_message text DEFAULT NULL,
             PRIMARY KEY (id),
             KEY status (status),
@@ -49,6 +50,20 @@ class Auto_Backup_Database {
             KEY backup_id (backup_id),
             KEY log_type (log_type),
             KEY created_at (created_at)
+        ) {$charset_collate};";
+        
+        $table_cloud = $wpdb->prefix . 'ab_cloud_credentials';
+        
+        $sql_cloud = "CREATE TABLE IF NOT EXISTS {$table_cloud} (
+            id bigint(20) NOT NULL AUTO_INCREMENT,
+            provider varchar(50) NOT NULL,
+            credentials text NOT NULL,
+            settings text DEFAULT NULL,
+            is_connected tinyint(1) DEFAULT 0,
+            created_at datetime NOT NULL,
+            updated_at datetime NOT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY provider (provider)
         ) {$charset_collate};";
         
         $sql_schedules = "CREATE TABLE IF NOT EXISTS {$table_schedules} (
@@ -69,9 +84,10 @@ class Auto_Backup_Database {
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql_backups);
         dbDelta($sql_logs);
+        dbDelta($sql_cloud);
         dbDelta($sql_schedules);
         
-        add_option('auto_backup_db_version', self::DB_VERSION);
+        update_option('auto_backup_db_version', self::DB_VERSION);
     }
     
     public function get_backups($args = array()) {
@@ -263,6 +279,57 @@ class Auto_Backup_Database {
         $table = $wpdb->prefix . 'ab_schedules';
         
         return $wpdb->delete($table, array('id' => $id));
+    }
+    
+    public function get_cloud_credentials($provider = null) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'ab_cloud_credentials';
+        
+        if ($provider) {
+            $row = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE provider = %s", $provider));
+            if ($row) {
+                $row->credentials = json_decode($row->credentials, true);
+                $row->settings = $row->settings ? json_decode($row->settings, true) : array();
+            }
+            return $row;
+        }
+        
+        $results = $wpdb->get_results("SELECT * FROM {$table}");
+        foreach ($results as $row) {
+            $row->credentials = json_decode($row->credentials, true);
+            $row->settings = $row->settings ? json_decode($row->settings, true) : array();
+        }
+        return $results;
+    }
+    
+    public function save_cloud_credentials($provider, $credentials, $settings = array(), $is_connected = false) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'ab_cloud_credentials';
+        
+        $data = array(
+            'provider' => $provider,
+            'credentials' => json_encode($credentials),
+            'settings' => json_encode($settings),
+            'is_connected' => $is_connected ? 1 : 0,
+            'updated_at' => current_time('mysql')
+        );
+        
+        $existing = $this->get_cloud_credentials($provider);
+        
+        if ($existing) {
+            return $wpdb->update($table, $data, array('provider' => $provider));
+        }
+        
+        $data['created_at'] = current_time('mysql');
+        $wpdb->insert($table, $data);
+        return $wpdb->insert_id;
+    }
+    
+    public function delete_cloud_credentials($provider) {
+        global $wpdb;
+        $table = $wpdb->prefix . 'ab_cloud_credentials';
+        
+        return $wpdb->delete($table, array('provider' => $provider));
     }
     
     public function get_total_backup_size() {
