@@ -128,7 +128,7 @@ class Auto_Backup_Backup_Engine {
         
         // Add header with important SQL settings
         $sql_content .= "-- WordPress Database Backup\n";
-        $sql_content .= "-- Generated: " . date('Y-m-d H:i:s') . "\n";
+        $sql_content .= "-- Generated: " . gmdate('Y-m-d H:i:s') . "\n";
         $sql_content .= "-- MySQL Version: " . $wpdb->db_version() . "\n\n";
         $sql_content .= "SET SQL_MODE = \"NO_AUTO_VALUE_ON_ZERO\";\n";
         $sql_content .= "SET FOREIGN_KEY_CHECKS = 0;\n";
@@ -336,7 +336,7 @@ class Auto_Backup_Backup_Engine {
             
             foreach ($backups_to_delete as $backup) {
                 if (file_exists($backup->storage_location)) {
-                    @unlink($backup->storage_location);
+                    wp_delete_file($backup->storage_location);
                 }
                 
                 $this->database->delete_backup($backup->id);
@@ -367,7 +367,7 @@ class Auto_Backup_Backup_Engine {
             $message = sprintf(
                 "Your WordPress backup has failed.\n\nError: %s\nDate: %s",
                 $error_message,
-                date('Y-m-d H:i:s')
+                gmdate('Y-m-d H:i:s')
             );
         }
         
@@ -382,7 +382,7 @@ class Auto_Backup_Backup_Engine {
         }
         
         if (file_exists($backup->storage_location)) {
-            @unlink($backup->storage_location);
+            wp_delete_file($backup->storage_location);
         }
         
         $this->database->delete_backup($backup_id);
@@ -402,7 +402,7 @@ class Auto_Backup_Backup_Engine {
         header('Content-Disposition: attachment; filename="' . $backup->backup_name . '"');
         header('Content-Length: ' . filesize($backup->storage_location));
         
-        readfile($backup->storage_location);
+        $this->stream_file($backup->storage_location);
         exit;
     }
     
@@ -447,11 +447,26 @@ class Auto_Backup_Backup_Engine {
             
             // Delete local file after successful cloud upload (cloud-first strategy)
             if (file_exists($backup_path)) {
-                @unlink($backup_path);
+                wp_delete_file($backup_path);
                 $this->logger->info('Local backup file deleted after cloud upload', $backup_id);
             }
         } else {
             $this->logger->warning('Cloud upload failed: ' . $result['message'], $backup_id);
         }
+    }
+
+    private function stream_file($file_path) {
+        global $wp_filesystem;
+        if (!function_exists('WP_Filesystem')) {
+            require_once ABSPATH . 'wp-admin/includes/file.php';
+        }
+        WP_Filesystem();
+
+        $content = $wp_filesystem->get_contents($file_path);
+        if (false === $content) {
+            return false;
+        }
+        echo $content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- File is a trusted local backup ZIP.
+        return true;
     }
 }

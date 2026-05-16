@@ -27,7 +27,7 @@ class Auto_Backup_Zip_Manager {
         $result = $this->zip->open($zip_path, ZipArchive::CREATE | ZipArchive::OVERWRITE);
         
         if ($result !== true) {
-            throw new Exception('Failed to create ZIP archive: ' . $zip_path);
+            throw new Exception(esc_html('Failed to create ZIP archive: ' . $zip_path));
         }
         
         return true;
@@ -40,7 +40,7 @@ class Auto_Backup_Zip_Manager {
         $result = $this->zip->open($zip_path);
         
         if ($result !== true) {
-            throw new Exception('Failed to open ZIP archive: ' . $zip_path);
+            throw new Exception(esc_html('Failed to open ZIP archive: ' . $zip_path));
         }
         
         return true;

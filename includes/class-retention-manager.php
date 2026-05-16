@@ -45,15 +45,15 @@ class Auto_Backup_Retention_Manager {
     
     private function delete_backup($backup) {
         if (file_exists($backup->storage_location)) {
-            $deleted = @unlink($backup->storage_location);
-            
-            if ($deleted) {
+            wp_delete_file($backup->storage_location);
+
+            if (!file_exists($backup->storage_location)) {
                 $this->logger->info('Deleted backup file: ' . $backup->backup_name);
             } else {
                 $this->logger->warning('Failed to delete backup file: ' . $backup->backup_name);
             }
         }
-        
+
         $this->database->delete_backup($backup->id);
     }
     
@@ -94,7 +94,7 @@ class Auto_Backup_Retention_Manager {
     }
     
     public function delete_old_backups_by_age($days) {
-        $cutoff_date = date('Y-m-d H:i:s', strtotime("-{$days} days"));
+        $cutoff_date = gmdate('Y-m-d H:i:s', strtotime("-{$days} days"));
         
         global $wpdb;
         $table = $wpdb->prefix . 'ab_backups';

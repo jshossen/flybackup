@@ -105,21 +105,41 @@ class Auto_Backup_Database {
         
         $args = wp_parse_args($args, $defaults);
         
-        $where = array('1=1');
-        
+        $where_conditions = array();
+        $where_values = array();
+
         if ($args['status']) {
-            $where[] = $wpdb->prepare('status = %s', $args['status']);
+            $where_conditions[] = 'status = %s';
+            $where_values[] = $args['status'];
         }
-        
+
         if ($args['type']) {
-            $where[] = $wpdb->prepare('backup_type = %s', $args['type']);
+            $where_conditions[] = 'backup_type = %s';
+            $where_values[] = $args['type'];
         }
-        
-        $where_clause = implode(' AND ', $where);
-        
-        $query = "SELECT * FROM {$table} WHERE {$where_clause} ORDER BY {$args['orderby']} {$args['order']} LIMIT {$args['limit']} OFFSET {$args['offset']}";
-        
-        return $wpdb->get_results($query);
+
+        $allowed_orderby = array('created_at', 'id', 'backup_name', 'status', 'backup_type');
+        $allowed_order = array('ASC', 'DESC');
+        $orderby = in_array($args['orderby'], $allowed_orderby, true) ? $args['orderby'] : 'created_at';
+        $order = in_array(strtoupper($args['order']), $allowed_order, true) ? strtoupper($args['order']) : 'DESC';
+
+        if (!empty($where_conditions)) {
+            $where_clause = 'WHERE ' . implode(' AND ', $where_conditions);
+            return $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT * FROM {$table} {$where_clause} ORDER BY {$orderby} {$order} LIMIT %d OFFSET %d",
+                    array_merge($where_values, array($args['limit'], $args['offset']))
+                )
+            );
+        }
+
+        return $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT * FROM {$table} ORDER BY {$orderby} {$order} LIMIT %d OFFSET %d",
+                $args['limit'],
+                $args['offset']
+            )
+        );
     }
     
     public function get_backup($id) {
@@ -134,7 +154,7 @@ class Auto_Backup_Database {
         $table = $wpdb->prefix . 'ab_backups';
         
         $defaults = array(
-            'backup_name' => 'backup_' . date('Y-m-d_H-i-s'),
+            'backup_name' => 'backup_' . gmdate('Y-m-d_H-i-s'),
             'backup_type' => 'full',
             'backup_size' => 0,
             'created_at' => current_time('mysql'),
@@ -184,21 +204,36 @@ class Auto_Backup_Database {
         
         $args = wp_parse_args($args, $defaults);
         
-        $where = array('1=1');
-        
+        $where_conditions = array();
+        $where_values = array();
+
         if ($args['backup_id']) {
-            $where[] = $wpdb->prepare('backup_id = %d', $args['backup_id']);
+            $where_conditions[] = 'backup_id = %d';
+            $where_values[] = $args['backup_id'];
         }
-        
+
         if ($args['log_type']) {
-            $where[] = $wpdb->prepare('log_type = %s', $args['log_type']);
+            $where_conditions[] = 'log_type = %s';
+            $where_values[] = $args['log_type'];
         }
-        
-        $where_clause = implode(' AND ', $where);
-        
-        $query = "SELECT * FROM {$table} WHERE {$where_clause} ORDER BY created_at DESC LIMIT {$args['limit']} OFFSET {$args['offset']}";
-        
-        return $wpdb->get_results($query);
+
+        if (!empty($where_conditions)) {
+            $where_clause = 'WHERE ' . implode(' AND ', $where_conditions);
+            return $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT * FROM {$table} {$where_clause} ORDER BY created_at DESC LIMIT %d OFFSET %d",
+                    array_merge($where_values, array($args['limit'], $args['offset']))
+                )
+            );
+        }
+
+        return $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT * FROM {$table} ORDER BY created_at DESC LIMIT %d OFFSET %d",
+                $args['limit'],
+                $args['offset']
+            )
+        );
     }
     
     public function add_log($data) {
@@ -245,7 +280,7 @@ class Auto_Backup_Database {
         $table = $wpdb->prefix . 'ab_schedules';
         
         $defaults = array(
-            'schedule_name' => 'Schedule ' . date('Y-m-d H:i:s'),
+            'schedule_name' => 'Schedule ' . gmdate('Y-m-d H:i:s'),
             'frequency' => 'daily',
             'backup_type' => 'full',
             'status' => 'active',

@@ -52,7 +52,7 @@ class Auto_Backup_Health_Check {
             wp_mkdir_p($backup_dir);
         }
         
-        $is_writable = is_writable($backup_dir);
+        $is_writable = wp_is_writable($backup_dir);
         
         return array(
             'status' => $is_writable ? 'ok' : 'critical',

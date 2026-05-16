@@ -162,7 +162,7 @@ class Auto_Backup_Scheduler {
                 $next_run = $base_time + DAY_IN_SECONDS;
         }
         
-        return date('Y-m-d H:i:s', $next_run);
+        return gmdate('Y-m-d H:i:s', $next_run);
     }
     
     private function schedule_cron($schedule_id, $frequency, $next_run) {

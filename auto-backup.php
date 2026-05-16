@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name: Auto Backup
- * Plugin URI: https://example.com/auto-backup
+ * Plugin URI: https://jshossen.com
  * Description: Automatic WordPress backups that just work. One-click automated backups without technical complexity.
  * Version: 1.0.0
  * Author: Your Name
- * Author URI: https://example.com
+ * Author URI: https://jshossen.com
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: auto-backup

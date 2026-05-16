@@ -73,7 +73,7 @@ class Auto_Backup_Dashboard_Widget {
             
             <?php if ($newest_backup): ?>
                 <div class="auto-backup-stat">
-                    <div class="auto-backup-stat-label"><?php _e('Last Backup', 'auto-backup'); ?></div>
+                    <div class="auto-backup-stat-label"><?php esc_html_e('Last Backup', 'auto-backup'); ?></div>
                     <div class="auto-backup-stat-value">
                         <?php echo esc_html(auto_backup_time_ago($newest_backup->created_at)); ?>
                         (<?php echo esc_html(auto_backup_format_bytes($newest_backup->backup_size)); ?>)
@@ -81,28 +81,28 @@ class Auto_Backup_Dashboard_Widget {
                 </div>
             <?php else: ?>
                 <div class="auto-backup-stat">
-                    <div class="auto-backup-stat-label"><?php _e('Last Backup', 'auto-backup'); ?></div>
-                    <div class="auto-backup-stat-value"><?php _e('No backups yet', 'auto-backup'); ?></div>
+                    <div class="auto-backup-stat-label"><?php esc_html_e('Last Backup', 'auto-backup'); ?></div>
+                    <div class="auto-backup-stat-value"><?php esc_html_e('No backups yet', 'auto-backup'); ?></div>
                 </div>
             <?php endif; ?>
             
             <?php if ($next_scheduled): ?>
                 <div class="auto-backup-stat">
-                    <div class="auto-backup-stat-label"><?php _e('Next Scheduled Backup', 'auto-backup'); ?></div>
+                    <div class="auto-backup-stat-label"><?php esc_html_e('Next Scheduled Backup', 'auto-backup'); ?></div>
                     <div class="auto-backup-stat-value">
-                        <?php echo esc_html($next_scheduled->schedule_name); ?> - 
-                        <?php echo esc_html(date('M j, Y g:i A', strtotime($next_scheduled->next_run))); ?>
+                        <?php echo esc_html($next_scheduled->schedule_name); ?> -
+                        <?php echo esc_html(gmdate('M j, Y g:i A', strtotime($next_scheduled->next_run))); ?>
                     </div>
                 </div>
             <?php else: ?>
                 <div class="auto-backup-stat">
-                    <div class="auto-backup-stat-label"><?php _e('Next Scheduled Backup', 'auto-backup'); ?></div>
-                    <div class="auto-backup-stat-value"><?php _e('No schedules configured', 'auto-backup'); ?></div>
+                    <div class="auto-backup-stat-label"><?php esc_html_e('Next Scheduled Backup', 'auto-backup'); ?></div>
+                    <div class="auto-backup-stat-value"><?php esc_html_e('No schedules configured', 'auto-backup'); ?></div>
                 </div>
             <?php endif; ?>
             
             <div class="auto-backup-stat">
-                <div class="auto-backup-stat-label"><?php _e('Total Backups', 'auto-backup'); ?></div>
+                <div class="auto-backup-stat-label"><?php esc_html_e('Total Backups', 'auto-backup'); ?></div>
                 <div class="auto-backup-stat-value">
                     <?php echo esc_html($storage['backup_count']); ?> 
                     (<?php echo esc_html($storage['total_size_formatted']); ?>)
@@ -110,8 +110,8 @@ class Auto_Backup_Dashboard_Widget {
             </div>
             
             <div class="auto-backup-actions">
-                <a href="<?php echo admin_url('admin.php?page=auto-backup'); ?>" class="button button-primary">
-                    <?php _e('Manage Backups', 'auto-backup'); ?>
+                <a href="<?php echo esc_url(admin_url('admin.php?page=auto-backup')); ?>" class="button button-primary">
+                    <?php esc_html_e('Manage Backups', 'auto-backup'); ?>
                 </a>
             </div>
         </div>

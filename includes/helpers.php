@@ -9,6 +9,20 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+if (!function_exists('wp_is_writable')) {
+    function wp_is_writable($path) {
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_is_writable -- Polyfill for WP < 6.5
+        return is_writable($path);
+    }
+}
+
+if (!function_exists('wp_rmdir')) {
+    function wp_rmdir($dir) {
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- Polyfill for WP < 6.3
+        return rmdir($dir);
+    }
+}
+
 function auto_backup_format_bytes($bytes, $precision = 2) {
     $units = array('B', 'KB', 'MB', 'GB', 'TB');
     
@@ -48,8 +62,8 @@ function auto_backup_get_backup_dir() {
 }
 
 function auto_backup_generate_backup_filename($type = 'full') {
-    $hash = substr(md5(uniqid(rand(), true)), 0, 8);
-    return 'backup_' . $type . '_' . date('Y-m-d_H-i-s') . '_' . $hash . '.zip';
+    $hash = substr(md5(uniqid(wp_rand(), true)), 0, 8);
+    return 'backup_' . $type . '_' . gmdate('Y-m-d_H-i-s') . '_' . $hash . '.zip';
 }
 
 function auto_backup_get_site_size() {
@@ -118,10 +132,10 @@ function auto_backup_is_writable() {
     $backup_dir = auto_backup_get_backup_dir();
     
     if (!file_exists($backup_dir)) {
-        return is_writable(WP_CONTENT_DIR);
+        return wp_is_writable(WP_CONTENT_DIR);
     }
     
-    return is_writable($backup_dir);
+    return wp_is_writable($backup_dir);
 }
 
 function auto_backup_get_php_memory_limit() {
@@ -196,7 +210,7 @@ function auto_backup_time_ago($datetime) {
     } elseif ($diff < 604800) {
         return floor($diff / 86400) . ' days ago';
     } else {
-        return date('M j, Y', $timestamp);
+        return gmdate('M j, Y', $timestamp);
     }
 }
 
@@ -221,11 +235,11 @@ function auto_backup_format_next_run($datetime) {
     } elseif ($diff < 86400) {
         return 'In ' . floor($diff / 3600) . ' hours';
     } elseif ($diff < 172800) { // Less than 2 days
-        return 'Tomorrow at ' . date('g:i A', $timestamp);
+        return 'Tomorrow at ' . gmdate('g:i A', $timestamp);
     } elseif ($diff < 604800) { // Less than 7 days
-        return date('l \a\t g:i A', $timestamp); // e.g., "Monday at 2:00 PM"
+        return gmdate('l \a\t g:i A', $timestamp); // e.g., "Monday at 2:00 PM"
     } else {
-        return date('M j, Y \a\t g:i A', $timestamp); // e.g., "May 15, 2026 at 2:00 PM"
+        return gmdate('M j, Y \a\t g:i A', $timestamp); // e.g., "May 15, 2026 at 2:00 PM"
     }
 }
 

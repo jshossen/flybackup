@@ -9,6 +9,13 @@ if (!defined('WP_UNINSTALL_PLUGIN')) {
     exit;
 }
 
+if (!function_exists('wp_rmdir')) {
+    function wp_rmdir($dir) {
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- Polyfill for WP < 6.3
+        return rmdir($dir);
+    }
+}
+
 global $wpdb;
 
 $table_backups = $wpdb->prefix . 'ab_backups';
@@ -31,10 +38,10 @@ if (is_dir($backup_dir)) {
     $files = glob($backup_dir . '*');
     foreach ($files as $file) {
         if (is_file($file)) {
-            @unlink($file);
+            wp_delete_file($file);
         }
     }
-    @rmdir($backup_dir);
+    wp_rmdir($backup_dir);
 }
 
 wp_clear_scheduled_hook('auto_backup_scheduled_backup');
