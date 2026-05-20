@@ -14,13 +14,17 @@ class Auto_Backup_Scheduler {
     private $database;
     private $logger;
     private $backup_engine;
+    private static $hooks_registered = false;
     
     public function __construct() {
         $this->database = new Auto_Backup_Database();
         $this->logger = new Auto_Backup_Logger();
         
-        add_action('auto_backup_scheduled_backup', array($this, 'execute_scheduled_backup'));
-        add_action('auto_backup_cleanup_old_backups', array($this, 'cleanup_old_backups'));
+        if (!self::$hooks_registered) {
+            add_action('auto_backup_scheduled_backup', array($this, 'execute_scheduled_backup'));
+            add_action('auto_backup_cleanup_old_backups', array($this, 'cleanup_old_backups'));
+            self::$hooks_registered = true;
+        }
     }
     
     public function create_schedule($name, $frequency, $backup_type, $items = array()) {
@@ -116,6 +120,13 @@ class Auto_Backup_Scheduler {
             return;
         }
         
+        $lock_key = 'ab_sched_lock_' . $schedule_id;
+        if (get_transient($lock_key)) {
+            $this->logger->warning('Scheduled backup skipped: already running', $schedule_id);
+            return;
+        }
+        set_transient($lock_key, 1, 5 * MINUTE_IN_SECONDS);
+        
         $this->logger->info('Executing scheduled backup: ' . $schedule->schedule_name);
         
         if (!$this->backup_engine) {
@@ -134,6 +145,8 @@ class Auto_Backup_Scheduler {
         ));
         
         $this->schedule_cron($schedule_id, $schedule->frequency, $next_run);
+        
+        delete_transient($lock_key);
         
         if ($result['success']) {
             $this->logger->success('Scheduled backup completed: ' . $schedule->schedule_name);

@@ -384,18 +384,18 @@ class Auto_Backup_Restore_Engine {
             // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared
             $create_table = $wpdb->get_row("SHOW CREATE TABLE `{$table_name}`", ARRAY_N);
             if ($create_table) {
-                fwrite($handle, "\n-- --------------------------------------------------------\n");
-                fwrite($handle, "-- Table structure for table `{$table_name}`\n");
-                fwrite($handle, "-- --------------------------------------------------------\n\n");
-                fwrite($handle, "DROP TABLE IF EXISTS `{$table_name}`;\n");
-                fwrite($handle, $create_table[1] . ";\n\n");
+                fwrite($handle, "\n-- --------------------------------------------------------\n"); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- Internal snapshot file write.
+                fwrite($handle, "-- Table structure for table `{$table_name}`\n"); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- Internal snapshot file write.
+                fwrite($handle, "-- --------------------------------------------------------\n\n"); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- Internal snapshot file write.
+                fwrite($handle, "DROP TABLE IF EXISTS `{$table_name}`;\n"); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- Internal snapshot file write.
+                fwrite($handle, $create_table[1] . ";\n\n"); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- Internal snapshot file write.
             }
 
             // Data.
             // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared
             $rows = $wpdb->get_results("SELECT * FROM `{$table_name}`", ARRAY_A);
             if (!empty($rows)) {
-                fwrite($handle, "-- Dumping data for table `{$table_name}`\n\n");
+                fwrite($handle, "-- Dumping data for table `{$table_name}`\n\n"); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- Internal snapshot file write.
                 $columns = array_keys($rows[0]);
                 $column_list = '`' . implode('`, `', $columns) . '`';
 
@@ -416,16 +416,16 @@ class Auto_Backup_Restore_Engine {
                     $batch_count++;
 
                     if ($batch_count >= $batch_size) {
-                        fwrite($handle, "INSERT INTO `{$table_name}` ({$column_list}) VALUES " . implode(', ', $insert_values) . ";\n");
+                        fwrite($handle, "INSERT INTO `{$table_name}` ({$column_list}) VALUES " . implode(', ', $insert_values) . ";\n"); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- Internal snapshot file write.
                         $batch_count = 0;
                         $insert_values = array();
                     }
                 }
 
                 if ($batch_count > 0) {
-                    fwrite($handle, "INSERT INTO `{$table_name}` ({$column_list}) VALUES " . implode(', ', $insert_values) . ";\n");
+                    fwrite($handle, "INSERT INTO `{$table_name}` ({$column_list}) VALUES " . implode(', ', $insert_values) . ";\n"); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- Internal snapshot file write.
                 }
-                fwrite($handle, "\n");
+                fwrite($handle, "\n"); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite -- Internal snapshot file write.
             }
         }
 

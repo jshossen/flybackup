@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getBackups, compareCurrentVsBackup, compareBackupVsBackup } from '../utils/api';
+import { getBackups, compareCurrentVsBackup, compareBackupVsBackup, getTableDiff } from '../utils/api';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const Compare = () => {
@@ -14,6 +14,8 @@ const Compare = () => {
     const [sourceId, setSourceId] = useState(urlParams.get('source') || '');
     const [targetId, setTargetId] = useState(urlParams.get('target') || '');
     const [expandedTables, setExpandedTables] = useState({});
+    const [tableDiffs, setTableDiffs] = useState({});
+    const [loadingDiff, setLoadingDiff] = useState({});
     const [expandedFiles, setExpandedFiles] = useState({
         added: false,
         removed: false,
@@ -71,6 +73,32 @@ const Compare = () => {
             ...prev,
             [tableName]: !prev[tableName]
         }));
+    };
+
+    const loadTableDiff = async (tableName) => {
+        if (tableDiffs[tableName]) {
+            return;
+        }
+
+        setLoadingDiff(prev => ({ ...prev, [tableName]: true }));
+        
+        try {
+            let sourceBackupId, targetBackupId;
+            if (mode === 'current') {
+                sourceBackupId = 0;
+                targetBackupId = parseInt(targetId);
+            } else {
+                sourceBackupId = parseInt(sourceId);
+                targetBackupId = parseInt(targetId);
+            }
+
+            const diff = await getTableDiff(targetBackupId, tableName, sourceBackupId, targetBackupId);
+            setTableDiffs(prev => ({ ...prev, [tableName]: diff }));
+        } catch (err) {
+            console.error('Error loading table diff:', err);
+        } finally {
+            setLoadingDiff(prev => ({ ...prev, [tableName]: false }));
+        }
     };
 
     const getStatusBadge = (status) => {
@@ -255,6 +283,71 @@ const Compare = () => {
                                                         <div className="row-side">
                                                             <strong>Target:</strong> {data.rows_target} rows ({data.size_target})
                                                         </div>
+                                                    </div>
+                                                )}
+                                                
+                                                {data.status === 'changed' && (
+                                                    <div className="row-diff-actions">
+                                                        {!tableDiffs[tableName] ? (
+                                                            <button 
+                                                                className="button button-small"
+                                                                onClick={() => loadTableDiff(tableName)}
+                                                                disabled={loadingDiff[tableName]}
+                                                            >
+                                                                {loadingDiff[tableName] ? 'Loading...' : 'View Row Details'}
+                                                            </button>
+                                                        ) : (
+                                                            <div className="table-diff-results">
+                                                                <div className="diff-summary">
+                                                                    <span className="diff-stat added">+{tableDiffs[tableName].total_added} added</span>
+                                                                    <span className="diff-stat removed">-{tableDiffs[tableName].total_removed} removed</span>
+                                                                    <span className="diff-stat changed">{tableDiffs[tableName].total_modified} modified</span>
+                                                                </div>
+                                                                
+                                                                {tableDiffs[tableName].total_added > 0 && (
+                                                                    <div className="diff-section">
+                                                                        <h4>Added Rows ({tableDiffs[tableName].total_added}):</h4>
+                                                                        {tableDiffs[tableName].added.slice(0, 5).map((row, idx) => (
+                                                                            <pre key={idx} className="row-data">{JSON.stringify(row, null, 2)}</pre>
+                                                                        ))}
+                                                                        {tableDiffs[tableName].total_added > 5 && (
+                                                                            <p className="more-rows">... and {tableDiffs[tableName].total_added - 5} more</p>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                                
+                                                                {tableDiffs[tableName].total_removed > 0 && (
+                                                                    <div className="diff-section">
+                                                                        <h4>Removed Rows ({tableDiffs[tableName].total_removed}):</h4>
+                                                                        {tableDiffs[tableName].removed.slice(0, 5).map((row, idx) => (
+                                                                            <pre key={idx} className="row-data">{JSON.stringify(row, null, 2)}</pre>
+                                                                        ))}
+                                                                        {tableDiffs[tableName].total_removed > 5 && (
+                                                                            <p className="more-rows">... and {tableDiffs[tableName].total_removed - 5} more</p>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                                
+                                                                {tableDiffs[tableName].total_modified > 0 && (
+                                                                    <div className="diff-section">
+                                                                        <h4>Modified Rows ({tableDiffs[tableName].total_modified}):</h4>
+                                                                        {tableDiffs[tableName].modified.slice(0, 3).map((change, idx) => (
+                                                                            <div key={idx} className="row-change">
+                                                                                <div className="before">Before: <pre>{JSON.stringify(change.before, null, 2)}</pre></div>
+                                                                                <div className="after">After: <pre>{JSON.stringify(change.after, null, 2)}</pre></div>
+                                                                            </div>
+                                                                        ))}
+                                                                        {tableDiffs[tableName].total_modified > 3 && (
+                                                                            <p className="more-rows">... and {tableDiffs[tableName].total_modified - 3} more</p>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                                
+                                                                {tableDiffs[tableName].has_more && (
+                                                                    <p className="notice-info">Showing limited results to prevent memory issues. Full diff contains more rows.</p>
+                                                                )}
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 )}
                                             </div>
