@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getCloudStatus, connectCloudProvider, disconnectCloudProvider } from '../utils/api';
 import LoadingSpinner from '../components/LoadingSpinner';
+import ConfirmModal from '../components/ConfirmModal';
 
 const CloudSettings = () => {
     const [providers, setProviders] = useState({});
@@ -9,6 +10,14 @@ const CloudSettings = () => {
     const [activeProvider, setActiveProvider] = useState(null);
     const [credentials, setCredentials] = useState({});
     const [message, setMessage] = useState(null);
+    
+    const [confirmModal, setConfirmModal] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        onConfirm: null,
+        danger: false
+    });
 
     useEffect(() => {
         loadCloudStatus();
@@ -47,9 +56,17 @@ const CloudSettings = () => {
         setConnecting(null);
     };
 
-    const handleDisconnect = async (provider) => {
-        if (!confirm('Are you sure you want to disconnect?')) return;
-
+    const handleDisconnect = (provider) => {
+        setConfirmModal({
+            isOpen: true,
+            title: 'Disconnect Cloud Storage',
+            message: 'Are you sure you want to disconnect from this cloud storage provider?',
+            onConfirm: () => executeDisconnect(provider),
+            danger: true
+        });
+    };
+    
+    const executeDisconnect = async (provider) => {
         try {
             await disconnectCloudProvider(provider);
             setMessage({ type: 'success', text: 'Disconnected successfully!' });
@@ -323,6 +340,15 @@ const CloudSettings = () => {
                     </div>
                 ))}
             </div>
+            
+            <ConfirmModal
+                isOpen={confirmModal.isOpen}
+                title={confirmModal.title}
+                message={confirmModal.message}
+                onConfirm={confirmModal.onConfirm}
+                onCancel={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                danger={confirmModal.danger}
+            />
         </div>
     );
 };

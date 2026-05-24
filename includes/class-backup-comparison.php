@@ -159,7 +159,7 @@ class Auto_Backup_Comparison {
         
         // Get backup database tables
         $sql_content = $this->extract_sql_from_zip($zip_path);
-        $backup_tables = $sql_content ? $this->parse_sql_structure($sql_content) : array();
+        $backup_tables = $sql_content ? $this->parse_sql_structure($sql_content, true) : array();
         
         // Compare tables
         $current_table_names = array_keys($current_tables);
@@ -273,8 +273,8 @@ class Auto_Backup_Comparison {
         $source_sql = $this->extract_sql_from_zip($source_zip);
         $target_sql = $this->extract_sql_from_zip($target_zip);
         
-        $source_tables = $source_sql ? $this->parse_sql_structure($source_sql) : array();
-        $target_tables = $target_sql ? $this->parse_sql_structure($target_sql) : array();
+        $source_tables = $source_sql ? $this->parse_sql_structure($source_sql, true) : array();
+        $target_tables = $target_sql ? $this->parse_sql_structure($target_sql, true) : array();
         
         // Compare tables
         $all_tables = array_unique(array_merge(array_keys($source_tables), array_keys($target_tables)));
@@ -475,31 +475,196 @@ class Auto_Backup_Comparison {
     /**
      * Helper: Parse SQL file to get table structures and row counts
      */
-    private function parse_sql_structure($sql_content) {
-        $tables = array();
+    private function parse_sql_structure($sql_content, $for_comparison = false) {
+        $table_stats = array();
         
-        // Match CREATE TABLE statements
+        // Seed with CREATE TABLE list so empty tables still appear.
         preg_match_all('/CREATE TABLE `([^`]+)`/', $sql_content, $create_matches);
-        
         foreach ($create_matches[1] as $table_name) {
-            // Count INSERT statements for this table
-            preg_match_all('/INSERT INTO `' . preg_quote($table_name, '/') . '`/', $sql_content, $insert_matches);
-            $row_count = count($insert_matches[0]);
-            
-            // Estimate size (rough calculation)
-            preg_match_all('/INSERT INTO `' . preg_quote($table_name, '/') . '`.+;/', $sql_content, $inserts);
-            $size = 0;
-            foreach ($inserts[0] as $insert) {
-                $size += strlen($insert);
-            }
-            
-            $tables[$table_name] = array(
-                'rows' => $row_count,
-                'size' => $this->format_file_size($size)
+            $table_stats[$table_name] = array(
+                'rows' => 0,
+                'size_bytes' => 0,
             );
         }
-        
-        return $tables;
+
+        // Parse SQL into statements safely (handles semicolons inside quoted values).
+        $statements = $this->split_sql_statements($sql_content);
+        foreach ($statements as $statement) {
+            if (!preg_match('/INSERT\s+INTO\s+`([^`]+)`/i', $statement, $table_match, PREG_OFFSET_CAPTURE)) {
+                continue;
+            }
+
+            $table_name = $table_match[1][0];
+            $insert_offset = $table_match[0][1];
+            $insert_statement = substr($statement, $insert_offset);
+
+            if ('' === trim($insert_statement)) {
+                continue;
+            }
+
+            if (!isset($table_stats[$table_name])) {
+                $table_stats[$table_name] = array(
+                    'rows' => 0,
+                    'size_bytes' => 0,
+                );
+            }
+
+            $table_stats[$table_name]['size_bytes'] += strlen($insert_statement);
+
+            $values_pos = stripos($insert_statement, 'VALUES');
+            if (false === $values_pos) {
+                continue;
+            }
+
+            $values_part = substr($insert_statement, $values_pos + 6);
+            $table_stats[$table_name]['rows'] += $this->count_insert_rows($values_part);
+        }
+
+        $tables = array();
+        $tables_list = array();
+        foreach ($table_stats as $table_name => $stats) {
+            $table_data = array(
+                'rows' => (int) $stats['rows'],
+                'size' => $this->format_file_size((int) $stats['size_bytes'])
+            );
+
+            $tables[$table_name] = $table_data;
+            $tables_list[] = array(
+                'name' => $table_name,
+                'rows' => $table_data['rows'],
+                'size' => $table_data['size']
+            );
+        }
+
+        if ($for_comparison) {
+            return $tables;
+        }
+
+        return array('tables' => $tables_list);
+    }
+
+    /**
+     * Split SQL dump into statements while respecting quoted strings.
+     */
+    private function split_sql_statements($sql_content) {
+        $statements = array();
+        $current = '';
+        $length = strlen($sql_content);
+        $in_string = false;
+        $string_quote = '';
+        $escaped = false;
+
+        for ($i = 0; $i < $length; $i++) {
+            $char = $sql_content[$i];
+            $current .= $char;
+
+            if ($in_string) {
+                if ($escaped) {
+                    $escaped = false;
+                    continue;
+                }
+
+                if ('\\' === $char) {
+                    $escaped = true;
+                    continue;
+                }
+
+                if ($char === $string_quote) {
+                    // Handle doubled quote escape (e.g. '').
+                    if ("'" === $string_quote && $i + 1 < $length && $sql_content[$i + 1] === "'") {
+                        $current .= $sql_content[$i + 1];
+                        $i++;
+                        continue;
+                    }
+
+                    $in_string = false;
+                    $string_quote = '';
+                }
+
+                continue;
+            }
+
+            if ("'" === $char || '"' === $char) {
+                $in_string = true;
+                $string_quote = $char;
+                continue;
+            }
+
+            if (';' === $char) {
+                $statement = trim($current);
+                if ('' !== $statement) {
+                    $statements[] = $statement;
+                }
+                $current = '';
+            }
+        }
+
+        $remaining = trim($current);
+        if ('' !== $remaining) {
+            $statements[] = $remaining;
+        }
+
+        return $statements;
+    }
+
+    /**
+     * Count row tuples in an INSERT ... VALUES payload.
+     */
+    private function count_insert_rows($values_part) {
+        $rows = 0;
+        $depth = 0;
+        $length = strlen($values_part);
+        $in_string = false;
+        $string_quote = '';
+        $escaped = false;
+
+        for ($i = 0; $i < $length; $i++) {
+            $char = $values_part[$i];
+
+            if ($in_string) {
+                if ($escaped) {
+                    $escaped = false;
+                    continue;
+                }
+
+                if ('\\' === $char) {
+                    $escaped = true;
+                    continue;
+                }
+
+                if ($char === $string_quote) {
+                    if ("'" === $string_quote && $i + 1 < $length && $values_part[$i + 1] === "'") {
+                        $i++;
+                        continue;
+                    }
+
+                    $in_string = false;
+                    $string_quote = '';
+                }
+
+                continue;
+            }
+
+            if ("'" === $char || '"' === $char) {
+                $in_string = true;
+                $string_quote = $char;
+                continue;
+            }
+
+            if ('(' === $char) {
+                if (0 === $depth) {
+                    $rows++;
+                }
+                $depth++;
+                continue;
+            }
+
+            if (')' === $char && $depth > 0) {
+                $depth--;
+            }
+        }
+
+        return $rows;
     }
     
     /**

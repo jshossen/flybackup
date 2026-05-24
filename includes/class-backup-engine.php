@@ -15,6 +15,7 @@ class Auto_Backup_Backup_Engine {
     private $logger;
     private $zip_manager;
     private $chunk_size = 100;
+    private $backup_metadata = array();
     
     public function __construct() {
         $this->database = new Auto_Backup_Database();
@@ -52,6 +53,36 @@ class Auto_Backup_Backup_Engine {
                 // Only backup database for 'full' type if no items specified
                 $should_backup_db = true;
             }
+
+            $this->backup_metadata = array(
+                'version' => '1.0',
+                'generated_at_gmt' => gmdate('c'),
+                'backup' => array(
+                    'id' => (int) $backup_id,
+                    'name' => $backup_data['backup_name'],
+                    'type' => $type,
+                    'is_scheduled' => (bool) $is_scheduled,
+                    'included_items' => $items,
+                ),
+                'database' => array(
+                    'included' => (bool) $should_backup_db,
+                    'sql_file' => 'database.sql',
+                    'tables' => array(),
+                    'summary' => array(
+                        'table_count' => 0,
+                        'total_rows' => 0,
+                        'data_size_bytes' => 0,
+                    ),
+                ),
+                'files' => array(
+                    'included' => ($type === 'full' || $type === 'partial'),
+                    'items' => array(),
+                    'summary' => array(
+                        'total_files' => 0,
+                        'total_size_bytes' => 0,
+                    ),
+                ),
+            );
             
             if ($should_backup_db) {
                 $this->logger->info('Backing up database', $backup_id);
@@ -66,10 +97,17 @@ class Auto_Backup_Backup_Engine {
                     $this->backup_files($backup_id, $item_path, $item_key);
                 }
             }
+
+            $duration = time() - $start_time;
+            $this->backup_metadata['backup']['duration_seconds'] = $duration;
+            $this->backup_metadata['backup']['completed_at_gmt'] = gmdate('c');
+            $meta_json = function_exists('wp_json_encode')
+                ? wp_json_encode($this->backup_metadata, JSON_PRETTY_PRINT)
+                : json_encode($this->backup_metadata, JSON_PRETTY_PRINT);
+            $this->zip_manager->add_from_string('backup-meta.json', $meta_json);
             
             $this->zip_manager->close();
-            
-            $duration = time() - $start_time;
+
             $backup_size = filesize($backup_path);
             
             $this->database->update_backup($backup_id, array(
@@ -138,6 +176,8 @@ class Auto_Backup_Backup_Engine {
         
         foreach ($tables as $table) {
             $table_name = $table[0];
+            $table_row_count = 0;
+            $table_data_size = 0;
             
             // Get CREATE TABLE statement
             $create_table = $wpdb->get_row("SHOW CREATE TABLE `{$table_name}`", ARRAY_N);
@@ -150,6 +190,7 @@ class Auto_Backup_Backup_Engine {
             
             // Get table data
             $rows = $wpdb->get_results("SELECT * FROM `{$table_name}`", ARRAY_A);
+            $table_row_count = is_array($rows) ? count($rows) : 0;
             
             if (!empty($rows)) {
                 $sql_content .= "-- Dumping data for table `{$table_name}`\n\n";
@@ -178,8 +219,10 @@ class Auto_Backup_Backup_Engine {
                     
                     // Write batch when size is reached or last row
                     if ($batch_count >= $batch_size || $row === end($rows)) {
-                        $sql_content .= "INSERT INTO `{$table_name}` ({$column_list}) VALUES\n";
-                        $sql_content .= implode(",\n", $insert_values) . ";\n";
+                        $insert_sql = "INSERT INTO `{$table_name}` ({$column_list}) VALUES\n";
+                        $insert_sql .= implode(",\n", $insert_values) . ";\n";
+                        $sql_content .= $insert_sql;
+                        $table_data_size += strlen($insert_sql);
                         $insert_values = array();
                         $batch_count = 0;
                     }
@@ -187,6 +230,15 @@ class Auto_Backup_Backup_Engine {
                 
                 $sql_content .= "\n";
             }
+
+            $this->backup_metadata['database']['tables'][] = array(
+                'name' => $table_name,
+                'rows' => (int) $table_row_count,
+                'size_bytes' => (int) $table_data_size,
+            );
+            $this->backup_metadata['database']['summary']['table_count']++;
+            $this->backup_metadata['database']['summary']['total_rows'] += (int) $table_row_count;
+            $this->backup_metadata['database']['summary']['data_size_bytes'] += (int) $table_data_size;
         }
         
         // Re-enable foreign key checks
@@ -198,14 +250,78 @@ class Auto_Backup_Backup_Engine {
         
         return true;
     }
+
+    private function collect_path_stats($source_path) {
+        $stats = array(
+            'file_count' => 0,
+            'size_bytes' => 0,
+        );
+
+        if (!is_dir($source_path)) {
+            if (file_exists($source_path)) {
+                $stats['file_count'] = 1;
+                $stats['size_bytes'] = (int) filesize($source_path);
+            }
+
+            return $stats;
+        }
+
+        $exclude_patterns = auto_backup_get_excluded_paths();
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($source_path, RecursiveDirectoryIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::SELF_FIRST
+        );
+
+        foreach ($iterator as $file) {
+            $file_path = $file->getRealPath();
+
+            if (auto_backup_should_exclude_file($file_path)) {
+                continue;
+            }
+
+            $excluded = false;
+            foreach ($exclude_patterns as $pattern) {
+                if (strpos($file_path, $pattern) !== false) {
+                    $excluded = true;
+                    break;
+                }
+            }
+
+            if ($excluded || $file->isDir()) {
+                continue;
+            }
+
+            $stats['file_count']++;
+            $stats['size_bytes'] += (int) $file->getSize();
+        }
+
+        return $stats;
+    }
     
     private function backup_files($backup_id, $source_path, $local_dir) {
         if (!is_dir($source_path)) {
             if (file_exists($source_path)) {
                 $this->zip_manager->add_file($source_path, $local_dir . '/' . basename($source_path));
+                $file_size = filesize($source_path);
+                $this->backup_metadata['files']['items'][$local_dir] = array(
+                    'source' => $source_path,
+                    'file_count' => 1,
+                    'size_bytes' => (int) $file_size,
+                );
+                $this->backup_metadata['files']['summary']['total_files'] += 1;
+                $this->backup_metadata['files']['summary']['total_size_bytes'] += (int) $file_size;
             }
             return;
         }
+
+        $stats = $this->collect_path_stats($source_path);
+        $this->backup_metadata['files']['items'][$local_dir] = array(
+            'source' => $source_path,
+            'file_count' => (int) $stats['file_count'],
+            'size_bytes' => (int) $stats['size_bytes'],
+        );
+        $this->backup_metadata['files']['summary']['total_files'] += (int) $stats['file_count'];
+        $this->backup_metadata['files']['summary']['total_size_bytes'] += (int) $stats['size_bytes'];
         
         $exclude_patterns = auto_backup_get_excluded_paths();
         

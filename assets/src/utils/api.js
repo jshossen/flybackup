@@ -86,6 +86,10 @@ export const getStats = async () => {
     return await apiFetch({ path: `/${API_NAMESPACE}/stats` });
 };
 
+export const getSystemRequirements = async () => {
+    return await apiFetch({ path: `/${API_NAMESPACE}/system-requirements` });
+};
+
 export const getBackupDetails = async (id) => {
     return await apiFetch({ path: `/${API_NAMESPACE}/backups/${id}/details` });
 };

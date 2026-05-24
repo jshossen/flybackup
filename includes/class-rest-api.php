@@ -133,6 +133,12 @@ class Auto_Backup_Rest_API {
             'permission_callback' => array($this, 'check_permission')
         ));
         
+        register_rest_route($this->namespace, '/system-requirements', array(
+            'methods' => 'GET',
+            'callback' => array($this, 'get_system_requirements'),
+            'permission_callback' => array($this, 'check_permission')
+        ));
+        
         // Backup comparison endpoints
         register_rest_route($this->namespace, '/backups/(?P<id>\d+)/details', array(
             'methods' => 'GET',
@@ -597,5 +603,112 @@ class Auto_Backup_Rest_API {
         }
         
         return new WP_Error('download_failed', $result['message'], array('status' => 500));
+    }
+    
+    public function get_system_requirements($request) {
+        $backup_dir = WP_CONTENT_DIR . '/auto-backups';
+        
+        $requirements = array(
+            'php' => array(
+                'name' => 'PHP Version',
+                'required' => '7.4 or higher',
+                'current' => PHP_VERSION,
+                'status' => version_compare(PHP_VERSION, '7.4', '>=') ? 'pass' : 'fail',
+                'critical' => true
+            ),
+            'zip' => array(
+                'name' => 'ZIP Extension',
+                'required' => 'Enabled',
+                'current' => extension_loaded('zip') ? 'Enabled' : 'Disabled',
+                'status' => extension_loaded('zip') ? 'pass' : 'fail',
+                'critical' => true
+            ),
+            'mysqli' => array(
+                'name' => 'MySQLi Extension',
+                'required' => 'Enabled',
+                'current' => extension_loaded('mysqli') ? 'Enabled' : 'Disabled',
+                'status' => extension_loaded('mysqli') ? 'pass' : 'fail',
+                'critical' => true
+            ),
+            'memory_limit' => array(
+                'name' => 'PHP Memory Limit',
+                'required' => '256M or higher',
+                'current' => ini_get('memory_limit'),
+                'status' => $this->check_memory_limit(ini_get('memory_limit'), 256) ? 'pass' : 'warning',
+                'critical' => false
+            ),
+            'max_execution_time' => array(
+                'name' => 'Max Execution Time',
+                'required' => '300 seconds or higher',
+                'current' => ini_get('max_execution_time') . ' seconds',
+                'status' => (int)ini_get('max_execution_time') >= 300 || (int)ini_get('max_execution_time') === 0 ? 'pass' : 'warning',
+                'critical' => false
+            ),
+            'disk_space' => array(
+                'name' => 'Available Disk Space',
+                'required' => '1GB or higher',
+                'current' => $this->format_bytes(disk_free_space(WP_CONTENT_DIR)),
+                'status' => disk_free_space(WP_CONTENT_DIR) >= 1073741824 ? 'pass' : 'warning',
+                'critical' => false
+            ),
+            'write_permissions' => array(
+                'name' => 'Backup Directory Writable',
+                'required' => 'Writable',
+                'current' => $this->check_directory_writable($backup_dir) ? 'Writable' : 'Not Writable',
+                'status' => $this->check_directory_writable($backup_dir) ? 'pass' : 'fail',
+                'critical' => true
+            ),
+            'curl' => array(
+                'name' => 'cURL Extension',
+                'required' => 'Enabled (for cloud storage)',
+                'current' => extension_loaded('curl') ? 'Enabled' : 'Disabled',
+                'status' => extension_loaded('curl') ? 'pass' : 'warning',
+                'critical' => false
+            )
+        );
+
+        return rest_ensure_response($requirements);
+    }
+    
+    private function check_memory_limit($limit, $required_mb) {
+        if ($limit == -1) return true;
+        $limit_mb = $this->convert_to_mb($limit);
+        return $limit_mb >= $required_mb;
+    }
+    
+    private function convert_to_mb($size) {
+        $size = trim($size);
+        $last = strtolower($size[strlen($size)-1]);
+        $size = (int)$size;
+        switch($last) {
+            case 'g': $size *= 1024;
+            case 'm': return $size;
+            case 'k': return $size / 1024;
+        }
+        return $size / 1048576;
+    }
+    
+    private function format_bytes($bytes, $precision = 2) {
+        $units = array('B', 'KB', 'MB', 'GB', 'TB');
+        $bytes = max($bytes, 0);
+        $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+        $pow = min($pow, count($units) - 1);
+        $bytes /= pow(1024, $pow);
+        return round($bytes, $precision) . ' ' . $units[$pow];
+    }
+    
+    private function check_directory_writable($dir) {
+        global $wp_filesystem;
+        
+        if (!function_exists('WP_Filesystem')) {
+            require_once ABSPATH . 'wp-admin/includes/file.php';
+        }
+        
+        if (WP_Filesystem()) {
+            return $wp_filesystem->is_writable($dir);
+        }
+        
+        // Fallback to direct check if WP_Filesystem fails
+        return wp_is_writable($dir);
     }
 }

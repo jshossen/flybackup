@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { getSettings, updateSettings } from '../utils/api';
 import LoadingSpinner from '../components/LoadingSpinner';
+import NotificationToast from '../components/NotificationToast';
 
 const Settings = () => {
     const [settings, setSettings] = useState(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    
+    const [notification, setNotification] = useState({
+        isOpen: false,
+        type: 'success',
+        message: ''
+    });
 
     useEffect(() => {
         loadSettings();
@@ -27,9 +34,17 @@ const Settings = () => {
         setSaving(true);
         try {
             await updateSettings(settings);
-            alert('Settings saved successfully!');
+            setNotification({
+                isOpen: true,
+                type: 'success',
+                message: 'Settings saved successfully!'
+            });
         } catch (error) {
-            alert('Failed to save settings: ' + error.message);
+            setNotification({
+                isOpen: true,
+                type: 'error',
+                message: 'Failed to save settings: ' + error.message
+            });
         } finally {
             setSaving(false);
         }
@@ -225,6 +240,13 @@ const Settings = () => {
                     </button>
                 </p>
             </form>
+            
+            <NotificationToast
+                isOpen={notification.isOpen}
+                type={notification.type}
+                message={notification.message}
+                onClose={() => setNotification(prev => ({ ...prev, isOpen: false }))}
+            />
         </div>
     );
 };
