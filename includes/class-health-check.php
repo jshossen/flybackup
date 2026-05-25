@@ -2,14 +2,14 @@
 /**
  * Health Check Class
  *
- * @package Auto_Backup
+ * @package Fly_Backup
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Auto_Backup_Health_Check {
+class Fly_Backup_Health_Check {
     
     private $checks = array();
     
@@ -26,7 +26,7 @@ class Auto_Backup_Health_Check {
             'zip_support' => array($this, 'check_zip_support')
         );
         
-        $this->checks = apply_filters('auto_backup_health_checks', $this->checks);
+        $this->checks = apply_filters('fly_backup_health_checks', $this->checks);
     }
     
     public function run_all_checks() {
@@ -46,7 +46,7 @@ class Auto_Backup_Health_Check {
     }
     
     public function check_writable() {
-        $backup_dir = auto_backup_get_backup_dir();
+        $backup_dir = fly_backup_get_backup_dir();
         
         if (!file_exists($backup_dir)) {
             wp_mkdir_p($backup_dir);
@@ -62,7 +62,7 @@ class Auto_Backup_Health_Check {
     }
     
     public function check_disk_space() {
-        $available_space = auto_backup_get_available_disk_space();
+        $available_space = fly_backup_get_available_disk_space();
         $required_space = 1024 * 1024 * 1024;
         
         $status = 'ok';
@@ -73,9 +73,9 @@ class Auto_Backup_Health_Check {
             $message = 'Unable to determine disk space';
         } elseif ($available_space < $required_space) {
             $status = 'critical';
-            $message = 'Low disk space: ' . auto_backup_format_bytes($available_space) . ' available';
+            $message = 'Low disk space: ' . fly_backup_format_bytes($available_space) . ' available';
         } else {
-            $message = auto_backup_format_bytes($available_space) . ' available';
+            $message = fly_backup_format_bytes($available_space) . ' available';
         }
         
         return array(
@@ -86,7 +86,7 @@ class Auto_Backup_Health_Check {
     }
     
     public function check_memory_limit() {
-        $memory_limit = auto_backup_get_php_memory_limit();
+        $memory_limit = fly_backup_get_php_memory_limit();
         $recommended_limit = 256 * 1024 * 1024;
         
         $status = 'ok';
@@ -94,9 +94,9 @@ class Auto_Backup_Health_Check {
         
         if ($memory_limit < $recommended_limit) {
             $status = 'warning';
-            $message = 'Memory limit is low: ' . auto_backup_format_bytes($memory_limit);
+            $message = 'Memory limit is low: ' . fly_backup_format_bytes($memory_limit);
         } else {
-            $message = 'Memory limit: ' . auto_backup_format_bytes($memory_limit);
+            $message = 'Memory limit: ' . fly_backup_format_bytes($memory_limit);
         }
         
         return array(

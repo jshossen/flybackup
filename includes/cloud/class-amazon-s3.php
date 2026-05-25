@@ -2,14 +2,14 @@
 /**
  * Amazon S3 Storage Class (Skeleton)
  *
- * @package Auto_Backup
+ * @package Fly_Backup
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Auto_Backup_Amazon_S3 extends Auto_Backup_Cloud_Base {
+class Fly_Backup_Amazon_S3 extends Fly_Backup_Cloud_Base {
     
     private $access_key;
     private $secret_key;
@@ -127,7 +127,7 @@ class Auto_Backup_Amazon_S3 extends Auto_Backup_Cloud_Base {
         }
         
         $file_name = basename($file_path);
-        $key = 'auto-backup/' . $file_name;
+        $key = 'fly-backup/' . $file_name;
         
         $file_content = file_get_contents($file_path);
         
@@ -189,7 +189,7 @@ class Auto_Backup_Amazon_S3 extends Auto_Backup_Cloud_Base {
             return array();
         }
         
-        $prefix = 'auto-backup/';
+        $prefix = 'fly-backup/';
         $response = $this->s3_request('GET', '/?prefix=' . urlencode($prefix) . '&max-keys=100');
         
         if (is_wp_error($response)) {

@@ -4,32 +4,32 @@
  *
  * Manages all cloud storage providers and handles credential encryption
  *
- * @package Auto_Backup
+ * @package Fly_Backup
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Auto_Backup_Cloud_Manager {
+class Fly_Backup_Cloud_Manager {
     
     private $database;
     private $providers = array();
     
     public function __construct() {
-        $this->database = new Auto_Backup_Database();
+        $this->database = new Fly_Backup_Database();
         $this->load_providers();
     }
     
     private function load_providers() {
         $provider_map = array(
-            'google_drive' => 'Auto_Backup_Google_Drive',
-            'dropbox' => 'Auto_Backup_Dropbox',
-            'amazon_s3' => 'Auto_Backup_Amazon_S3'
+            'google_drive' => 'Fly_Backup_Google_Drive',
+            'dropbox' => 'Fly_Backup_Dropbox',
+            'amazon_s3' => 'Fly_Backup_Amazon_S3'
         );
         
         foreach ($provider_map as $provider => $class_name) {
-            $class_file = AUTO_BACKUP_PLUGIN_DIR . 'includes/cloud/class-' . str_replace('_', '-', $provider) . '.php';
+            $class_file = FLY_BACKUP_PLUGIN_DIR . 'includes/cloud/class-' . str_replace('_', '-', $provider) . '.php';
             if (file_exists($class_file)) {
                 require_once $class_file;
                 if (class_exists($class_name)) {
@@ -40,7 +40,7 @@ class Auto_Backup_Cloud_Manager {
     }
     
     private function encrypt_credentials($credentials) {
-        $key = wp_hash('auto_backup_cloud_key');
+        $key = wp_hash('fly_backup_cloud_key');
         $json = json_encode($credentials);
         $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length('AES-256-CBC'));
         $encrypted = openssl_encrypt($json, 'AES-256-CBC', $key, 0, $iv);
@@ -48,7 +48,7 @@ class Auto_Backup_Cloud_Manager {
     }
     
     private function decrypt_credentials($encrypted_data) {
-        $key = wp_hash('auto_backup_cloud_key');
+        $key = wp_hash('fly_backup_cloud_key');
         $parts = explode('::', base64_decode($encrypted_data), 2);
         if (count($parts) !== 2) {
             return array();
@@ -152,7 +152,7 @@ class Auto_Backup_Cloud_Manager {
             return null;
         }
         
-        $temp_dir = wp_upload_dir()['basedir'] . '/auto-backup/temp/';
+        $temp_dir = wp_upload_dir()['basedir'] . '/fly-backup/temp/';
         if (!file_exists($temp_dir)) {
             wp_mkdir_p($temp_dir);
         }

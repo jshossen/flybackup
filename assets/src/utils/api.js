@@ -1,6 +1,6 @@
 import apiFetch from '@wordpress/api-fetch';
 
-const API_NAMESPACE = 'auto-backup/v1';
+const API_NAMESPACE = 'fly-backup/v1';
 
 export const getBackups = async (params = {}) => {
     const query = new URLSearchParams(params).toString();

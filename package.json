@@ -1,7 +1,7 @@
 {
-  "name": "auto-backup",
+  "name": "fly-backup",
   "version": "1.0.0",
-  "description": "Automatic WordPress backups that just work",
+  "description": "Fast, reliable WordPress backups that just work",
   "main": "assets/src/index.js",
   "scripts": {
     "start": "webpack --mode development --watch",
@@ -15,9 +15,10 @@
     "wordpress",
     "backup",
     "restore",
-    "automatic"
+    "automatic",
+    "flybackup"
   ],
-  "author": "Your Name",
+  "author": "jshossen",
   "license": "GPL-2.0-or-later",
   "devDependencies": {
     "@babel/core": "^7.23.0",

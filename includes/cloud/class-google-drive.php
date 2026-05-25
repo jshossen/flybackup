@@ -2,14 +2,14 @@
 /**
  * Google Drive Storage Class (Skeleton)
  *
- * @package Auto_Backup
+ * @package Fly_Backup
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Auto_Backup_Google_Drive extends Auto_Backup_Cloud_Base {
+class Fly_Backup_Google_Drive extends Fly_Backup_Cloud_Base {
     
     private $api_base = 'https://www.googleapis.com/drive/v3';
     private $upload_base = 'https://www.googleapis.com/upload/drive/v3';
@@ -61,7 +61,7 @@ class Auto_Backup_Google_Drive extends Auto_Backup_Cloud_Base {
         }
         
         $file_name = basename($file_path);
-        $folder_id = $this->get_or_create_folder('Auto_Backup');
+        $folder_id = $this->get_or_create_folder('Fly_Backup');
         
         $boundary = uniqid();
         $metadata = json_encode(array(

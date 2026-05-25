@@ -221,7 +221,7 @@ const CloudSettings = () => {
                         <li>Create a project and enable the Google Drive API</li>
                         <li>Go to Credentials → Create Credentials → OAuth 2.0 Client ID</li>
                         <li>Configure the consent screen with scope: <code>https://www.googleapis.com/auth/drive.file</code></li>
-                        <li>Add redirect URI: <code>{window.location.origin}/wp-admin/admin.php?page=auto-backup-cloud</code></li>
+                        <li>Add redirect URI: <code>{window.location.origin}/wp-admin/admin.php?page=fly-backup-cloud</code></li>
                         <li>Copy Client ID and Client Secret</li>
                         <li>Use <a href="https://developers.google.com/oauthplayground" target="_blank" rel="noopener noreferrer">OAuth Playground</a> to exchange for an Access Token</li>
                         <li>Paste the Access Token here and click Connect</li>
@@ -251,7 +251,7 @@ const CloudSettings = () => {
                     <ol>
                         <li>Go to <a href="https://console.aws.amazon.com/iam/" target="_blank" rel="noopener noreferrer">AWS IAM Console</a></li>
                         <li>Click <strong>Users</strong> → <strong>Create user</strong></li>
-                        <li>Enter a username (e.g., <code>auto-backup-s3</code>)</li>
+                        <li>Enter a username (e.g., <code>fly-backup-s3</code>)</li>
                         <li>Select <strong>Attach policies directly</strong></li>
                         <li>Attach <code>AmazonS3FullAccess</code> (or a custom policy with PutObject/GetObject)</li>
                         <li>Review and create user</li>

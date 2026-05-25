@@ -228,7 +228,7 @@ const Backups = () => {
                                 <td>
                                     <div className="backup-actions">
                                         <a 
-                                            href={`?page=auto-backup-backup-details&backup_id=${backup.id}`}
+                                            href={`?page=fly-backup-backup-details&backup_id=${backup.id}`}
                                             className="button button-small action-details"
                                             title="View Details"
                                         >

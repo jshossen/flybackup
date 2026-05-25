@@ -1,22 +1,22 @@
-=== Auto Backup ===
+=== FlyBackup - Auto backup manager ===
 Contributors: jshossen
 Tags: backup, restore, database backup, wordpress backup, automatic backup, scheduled backup, site backup
 Requires at least: 5.8
-Tested up to: 6.7
+Tested up to: 7.0
 Stable tag: 1.0.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Automatic WordPress backups that just work. One-click automated backups without technical complexity. Backup your database, files, and restore with ease.
+Fast, reliable WordPress backups that just work. One-click automated backups without technical complexity. Backup your database, files, and restore with ease.
 
 == Description ==
 
-**Auto Backup** is a modern, lightweight WordPress backup plugin designed for beginners and professionals alike. Create automated backups of your entire WordPress site with just one click. No complex configuration, no technical knowledge required – just reliable backups that protect your website.
+**FlyBackup** is a modern, lightweight WordPress backup plugin designed for beginners and professionals alike. Create automated backups of your entire WordPress site with just one click. No complex configuration, no technical knowledge required – just reliable backups that protect your website.
 
-Whether you're running a personal blog, business website, or e-commerce store, Auto Backup ensures your data is safe and can be restored instantly when needed. With its intuitive interface and powerful features, backing up your WordPress site has never been easier.
+Whether you're running a personal blog, business website, or e-commerce store, FlyBackup ensures your data is safe and can be restored instantly when needed. With its intuitive interface and powerful features, backing up your WordPress site has never been easier.
 
-= Why Choose Auto Backup? =
+= Why Choose FlyBackup? =
 
 * **Simple & Intuitive** - Clean, modern interface that anyone can use
 * **Reliable** - Built with WordPress best practices and tested thoroughly
@@ -96,10 +96,10 @@ Whether you're running a personal blog, business website, or e-commerce store, A
 
 1. Log in to your WordPress admin dashboard
 2. Navigate to Plugins → Add New
-3. Search for "Auto Backup"
+3. Search for "FlyBackup"
 4. Click "Install Now" button
 5. Click "Activate" after installation completes
-6. Navigate to "Auto Backup" in your WordPress admin menu
+6. Navigate to "FlyBackup" in your WordPress admin menu
 7. Review the system requirements checker on the dashboard
 8. Configure your backup settings
 9. Create your first backup!
@@ -111,17 +111,17 @@ Whether you're running a personal blog, business website, or e-commerce store, A
 3. Navigate to Plugins → Add New → Upload Plugin
 4. Choose the downloaded ZIP file and click "Install Now"
 5. Click "Activate Plugin" after installation completes
-6. Navigate to "Auto Backup" in your WordPress admin menu
+6. Navigate to "FlyBackup" in your WordPress admin menu
 7. Configure your settings and create your first backup
 
 = FTP Installation =
 
 1. Download and extract the plugin ZIP file
-2. Upload the `auto-backup` folder to `/wp-content/plugins/` directory via FTP
+2. Upload the `fly-backup` folder to `/wp-content/plugins/` directory via FTP
 3. Log in to your WordPress admin dashboard
 4. Navigate to Plugins → Installed Plugins
-5. Find "Auto Backup" and click "Activate"
-6. Navigate to "Auto Backup" in your WordPress admin menu
+5. Find "FlyBackup" and click "Activate"
+6. Navigate to "FlyBackup" in your WordPress admin menu
 
 = After Installation =
 
@@ -135,7 +135,7 @@ Whether you're running a personal blog, business website, or e-commerce store, A
 
 = Where are backups stored? =
 
-By default, backups are stored in `/wp-content/auto-backups/` directory on your server. Each backup is saved as a ZIP file with a timestamp. Pro version will add cloud storage options (Google Drive, Dropbox, Amazon S3, OneDrive).
+By default, backups are stored in `/wp-content/fly-backups/` directory on your server. Each backup is saved as a ZIP file with a timestamp. Pro version will add cloud storage options (Google Drive, Dropbox, Amazon S3, OneDrive).
 
 = How large can my backups be? =
 
@@ -147,7 +147,7 @@ Yes! One-click restore is included. Simply select a backup from the list, choose
 
 = Does this work with WooCommerce? =
 
-Absolutely! Auto Backup works perfectly with WooCommerce and all other WordPress plugins. It backs up your entire database including all WooCommerce orders, products, and customer data.
+Absolutely! FlyBackup works perfectly with WooCommerce and all other WordPress plugins. It backs up your entire database including all WooCommerce orders, products, and customer data.
 
 = How many backups are kept? =
 
@@ -179,7 +179,7 @@ Yes! You can set up automated schedules for hourly, daily, weekly, or monthly ba
 
 = Does it work on shared hosting? =
 
-Yes! Auto Backup is designed to work on shared hosting environments. It respects server limits and uses efficient processing methods. Check the system requirements to ensure your host meets the minimum specifications.
+Yes! FlyBackup is designed to work on shared hosting environments. It respects server limits and uses efficient processing methods. Check the system requirements to ensure your host meets the minimum specifications.
 
 = Can I compare backups? =
 
@@ -230,27 +230,27 @@ Check the plugin's documentation first. For additional support, visit the WordPr
 == Upgrade Notice ==
 
 = 1.0.0 =
-Initial release of Auto Backup. Create your first automated WordPress backup today! Protect your website with reliable, easy-to-use backup solution.
+Initial release of FlyBackup. Create your first automated WordPress backup today! Protect your website with reliable, easy-to-use backup solution.
 
 == Privacy Policy ==
 
-Auto Backup does not collect, store, or transmit any personal data or website information to external servers. All backups are stored locally on your server in the `/wp-content/auto-backups/` directory. The plugin operates entirely within your WordPress installation and respects your privacy.
+FlyBackup does not collect, store, or transmit any personal data or website information to external servers. All backups are stored locally on your server in the `/wp-content/fly-backups/` directory. The plugin operates entirely within your WordPress installation and respects your privacy.
 
 When you use the Pro version's cloud storage features (coming soon), your backup files will be transmitted to your chosen cloud provider (Google Drive, Dropbox, Amazon S3, or OneDrive) using their official APIs. You control which cloud services to use and can disconnect them at any time.
 
 == Support ==
 
 For support, please visit:
-* WordPress.org support forums: https://wordpress.org/support/plugin/auto-backup/
-* GitHub repository: https://github.com/jshossen/auto-backup
+* WordPress.org support forums: https://wordpress.org/support/plugin/fly-backup/
+* GitHub repository: https://github.com/jshossen/fly-backup
 * Documentation: Available in the plugin's Help section
 * Bug reports: Use the WordPress.org support forums or GitHub Issues
 
 == Contributing ==
 
-Auto Backup is open source and welcomes contributions. If you'd like to contribute code, report bugs, or suggest features:
+FlyBackup is open source and welcomes contributions. If you'd like to contribute code, report bugs, or suggest features:
 
-* GitHub repository: https://github.com/jshossen/auto-backup
+* GitHub repository: https://github.com/jshossen/fly-backup
 * Submit pull requests on GitHub
 * Report issues on GitHub Issues
 * Join discussions in WordPress.org support forums

@@ -2,14 +2,14 @@
 /**
  * ZIP Manager Class
  *
- * @package Auto_Backup
+ * @package Fly_Backup
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Auto_Backup_Zip_Manager {
+class Fly_Backup_Zip_Manager {
     
     private $zip;
     private $zip_path;
@@ -148,7 +148,7 @@ class Auto_Backup_Zip_Manager {
             }
         }
         
-        return auto_backup_should_exclude_file($file_path);
+        return fly_backup_should_exclude_file($file_path);
     }
     
     public function extract($destination) {

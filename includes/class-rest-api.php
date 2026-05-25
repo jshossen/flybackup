@@ -2,16 +2,16 @@
 /**
  * REST API Class
  *
- * @package Auto_Backup
+ * @package Fly_Backup
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Auto_Backup_Rest_API {
+class Fly_Backup_Rest_API {
     
-    private $namespace = 'auto-backup/v1';
+    private $namespace = 'fly-backup/v1';
     private $database;
     private $backup_engine;
     private $restore_engine;
@@ -21,13 +21,13 @@ class Auto_Backup_Rest_API {
     private $comparison;
     
     public function __construct() {
-        $this->database = new Auto_Backup_Database();
-        $this->backup_engine = new Auto_Backup_Backup_Engine();
-        $this->restore_engine = new Auto_Backup_Restore_Engine();
-        $this->scheduler = new Auto_Backup_Scheduler();
-        $this->health_check = new Auto_Backup_Health_Check();
-        $this->logger = new Auto_Backup_Logger();
-        $this->comparison = new Auto_Backup_Comparison();
+        $this->database = new Fly_Backup_Database();
+        $this->backup_engine = new Fly_Backup_Backup_Engine();
+        $this->restore_engine = new Fly_Backup_Restore_Engine();
+        $this->scheduler = new Fly_Backup_Scheduler();
+        $this->health_check = new Fly_Backup_Health_Check();
+        $this->logger = new Fly_Backup_Logger();
+        $this->comparison = new Fly_Backup_Comparison();
         
         add_action('rest_api_init', array($this, 'register_routes'));
     }
@@ -215,8 +215,8 @@ class Auto_Backup_Rest_API {
         
         foreach ($backups as &$backup) {
             $backup->included_items = json_decode($backup->included_items, true);
-            $backup->size_formatted = auto_backup_format_bytes($backup->backup_size);
-            $backup->time_ago = auto_backup_time_ago($backup->created_at);
+            $backup->size_formatted = fly_backup_format_bytes($backup->backup_size);
+            $backup->time_ago = fly_backup_time_ago($backup->created_at);
             $backup->cloud_storage = $backup->cloud_storage ? json_decode($backup->cloud_storage, true) : null;
         }
         
@@ -235,8 +235,8 @@ class Auto_Backup_Rest_API {
         }
         
         $backup->included_items = json_decode($backup->included_items, true);
-        $backup->size_formatted = auto_backup_format_bytes($backup->backup_size);
-        $backup->time_ago = auto_backup_time_ago($backup->created_at);
+        $backup->size_formatted = fly_backup_format_bytes($backup->backup_size);
+        $backup->time_ago = fly_backup_time_ago($backup->created_at);
         $backup->cloud_storage = $backup->cloud_storage ? json_decode($backup->cloud_storage, true) : null;
         
         return new WP_REST_Response($backup, 200);
@@ -293,7 +293,7 @@ class Auto_Backup_Rest_API {
         
         foreach ($schedules as &$schedule) {
             $schedule->included_items = json_decode($schedule->included_items, true);
-            $schedule->next_run_formatted = auto_backup_format_next_run($schedule->next_run);
+            $schedule->next_run_formatted = fly_backup_format_next_run($schedule->next_run);
         }
         
         return new WP_REST_Response($schedules, 200);
@@ -381,8 +381,8 @@ class Auto_Backup_Rest_API {
     }
     
     public function get_settings($request) {
-        $settings = auto_backup_get_settings();
-        $retention_count = get_option('auto_backup_retention_count', 5);
+        $settings = fly_backup_get_settings();
+        $retention_count = get_option('fly_backup_retention_count', 5);
         
         return new WP_REST_Response(array(
             'settings' => $settings,
@@ -394,11 +394,11 @@ class Auto_Backup_Rest_API {
         $params = $request->get_json_params();
         
         if (isset($params['settings'])) {
-            auto_backup_update_settings($params['settings']);
+            fly_backup_update_settings($params['settings']);
         }
         
         if (isset($params['retention_count'])) {
-            update_option('auto_backup_retention_count', intval($params['retention_count']));
+            update_option('fly_backup_retention_count', intval($params['retention_count']));
         }
         
         return new WP_REST_Response(array(
@@ -408,7 +408,7 @@ class Auto_Backup_Rest_API {
     }
     
     public function get_stats($request) {
-        $retention_manager = new Auto_Backup_Retention_Manager();
+        $retention_manager = new Fly_Backup_Retention_Manager();
         $storage = $retention_manager->get_storage_usage();
         $newest_backup = $retention_manager->get_newest_backup();
         $schedules = $this->scheduler->get_active_schedules();
@@ -428,13 +428,13 @@ class Auto_Backup_Rest_API {
             'last_backup' => $newest_backup ? array(
                 'name' => $newest_backup->backup_name,
                 'date' => $newest_backup->created_at,
-                'time_ago' => auto_backup_time_ago($newest_backup->created_at),
-                'size' => auto_backup_format_bytes($newest_backup->backup_size)
+                'time_ago' => fly_backup_time_ago($newest_backup->created_at),
+                'size' => fly_backup_format_bytes($newest_backup->backup_size)
             ) : null,
             'next_scheduled' => $next_scheduled ? array(
                 'name' => $next_scheduled->schedule_name,
                 'date' => $next_scheduled->next_run,
-                'time_until' => auto_backup_format_next_run($next_scheduled->next_run)
+                'time_until' => fly_backup_format_next_run($next_scheduled->next_run)
             ) : null
         ), 200);
     }
@@ -495,7 +495,7 @@ class Auto_Backup_Rest_API {
     
     // Cloud storage methods
     public function get_cloud_status($request) {
-        $cloud_manager = new Auto_Backup_Cloud_Manager();
+        $cloud_manager = new Fly_Backup_Cloud_Manager();
         $status = $cloud_manager->get_all_providers_status();
         
         return new WP_REST_Response($status, 200);
@@ -512,7 +512,7 @@ class Auto_Backup_Rest_API {
             return new WP_Error('invalid_params', 'Provider and credentials are required', array('status' => 400));
         }
         
-        $cloud_manager = new Auto_Backup_Cloud_Manager();
+        $cloud_manager = new Fly_Backup_Cloud_Manager();
         $result = $cloud_manager->connect_provider($provider, $credentials, $settings);
         
         if ($result['success']) {
@@ -525,7 +525,7 @@ class Auto_Backup_Rest_API {
     public function disconnect_cloud_provider($request) {
         $provider = $request['provider'];
         
-        $cloud_manager = new Auto_Backup_Cloud_Manager();
+        $cloud_manager = new Fly_Backup_Cloud_Manager();
         $result = $cloud_manager->disconnect_provider($provider);
         
         return new WP_REST_Response($result, 200);
@@ -549,7 +549,7 @@ class Auto_Backup_Rest_API {
             return new WP_Error('file_not_found', 'Backup file not found', array('status' => 404));
         }
         
-        $cloud_manager = new Auto_Backup_Cloud_Manager();
+        $cloud_manager = new Fly_Backup_Cloud_Manager();
         $result = $cloud_manager->upload_backup($provider, $backup->storage_location);
         
         if ($result['success']) {
@@ -578,7 +578,7 @@ class Auto_Backup_Rest_API {
             return new WP_Error('backup_not_found', 'Backup not found', array('status' => 404));
         }
         
-        if (!class_exists('Auto_Backup_Cloud_Manager')) {
+        if (!class_exists('Fly_Backup_Cloud_Manager')) {
             return new WP_Error('cloud_not_available', 'Cloud storage not available', array('status' => 400));
         }
         
@@ -591,7 +591,7 @@ class Auto_Backup_Rest_API {
             return new WP_Error('invalid_cloud_data', 'Invalid cloud storage data', array('status' => 400));
         }
         
-        $cloud_manager = new Auto_Backup_Cloud_Manager();
+        $cloud_manager = new Fly_Backup_Cloud_Manager();
         $result = $cloud_manager->download_backup(
             $cloud_storage['provider'],
             $cloud_storage['remote_path'],
@@ -606,7 +606,7 @@ class Auto_Backup_Rest_API {
     }
     
     public function get_system_requirements($request) {
-        $backup_dir = WP_CONTENT_DIR . '/auto-backups';
+        $backup_dir = WP_CONTENT_DIR . '/fly-backups';
         
         $requirements = array(
             'php' => array(

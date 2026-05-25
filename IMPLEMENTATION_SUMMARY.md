@@ -219,7 +219,7 @@ assets/src/styles/main.scss
 
 ## 🎉 Result
 
-The Auto Backup plugin now has a **professional, modern UI** with:
+The Fly Backup plugin now has a **professional, modern UI** with:
 - Beautiful custom modals
 - Real-time progress tracking
 - Non-blocking notifications

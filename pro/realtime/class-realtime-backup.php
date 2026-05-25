@@ -2,14 +2,14 @@
 /**
  * Real-time Backup Class (Skeleton)
  *
- * @package Auto_Backup
+ * @package Fly_Backup
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Auto_Backup_Realtime_Backup {
+class Fly_Backup_Realtime_Backup {
     
     public function __construct() {
         add_action('save_post', array($this, 'on_post_save'));

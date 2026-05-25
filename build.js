@@ -2,14 +2,14 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-// Read version from auto-backup.php
+// Read version from fly-backup.php
 function getPluginVersion() {
-    const pluginFile = path.join(__dirname, 'auto-backup.php');
+    const pluginFile = path.join(__dirname, 'fly-backup.php');
     const content = fs.readFileSync(pluginFile, 'utf8');
     const versionMatch = content.match(/\*\s*Version:\s*([0-9.]+)/);
     
     if (!versionMatch) {
-        console.error('❌ Could not find version in auto-backup.php');
+        console.error('❌ Could not find version in fly-backup.php');
         process.exit(1);
     }
     
@@ -18,7 +18,7 @@ function getPluginVersion() {
 
 // Create ZIP file
 function createZip(version) {
-    const pluginName = 'auto-backup';
+    const pluginName = 'fly-backup';
     const zipName = `${pluginName}-${version}.zip`;
     const currentDir = __dirname;
     const pluginDir = path.basename(currentDir);
@@ -39,14 +39,14 @@ function createZip(version) {
     
     // Files and directories to include in the ZIP
     const includeFiles = [
-        'auto-backup.php',
+        'fly-backup.php',
         'uninstall.php',
         'readme.txt',
         'README.md',
         'composer.json',
         'includes/',
         'admin/',
-        'pro/',
+        // 'pro/',
         'assets/js/',
         'assets/css/',
         'assets/images/',

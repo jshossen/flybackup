@@ -38,11 +38,11 @@ const BackupDetails = () => {
     };
 
     const handleCompareCurrent = () => {
-        window.location.href = `?page=auto-backup-compare&mode=current&target=${id}`;
+        window.location.href = `?page=fly-backup-compare&mode=current&target=${id}`;
     };
 
     const handleCompareBackup = () => {
-        window.location.href = `?page=auto-backup-compare&mode=backup&source=${id}`;
+        window.location.href = `?page=fly-backup-compare&mode=backup&source=${id}`;
     };
 
     if (loading) return <LoadingSpinner />;

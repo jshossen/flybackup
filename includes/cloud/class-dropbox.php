@@ -2,14 +2,14 @@
 /**
  * Dropbox Storage Class (Skeleton)
  *
- * @package Auto_Backup
+ * @package Fly_Backup
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Auto_Backup_Dropbox extends Auto_Backup_Cloud_Base {
+class Fly_Backup_Dropbox extends Fly_Backup_Cloud_Base {
     
     private $api_base = 'https://api.dropboxapi.com/2';
     private $content_base = 'https://content.dropboxapi.com/2';
@@ -59,7 +59,7 @@ class Auto_Backup_Dropbox extends Auto_Backup_Cloud_Base {
         }
         
         $file_name = basename($file_path);
-        $dropbox_path = '/Auto_Backup/' . $file_name;
+        $dropbox_path = '/Fly_Backup/' . $file_name;
         
         $response = wp_remote_post($this->content_base . '/files/upload', array(
             'headers' => array(
@@ -138,7 +138,7 @@ class Auto_Backup_Dropbox extends Auto_Backup_Cloud_Base {
             return array();
         }
         
-        $path = $remote_path === '/' ? '/Auto_Backup' : $remote_path;
+        $path = $remote_path === '/' ? '/Fly_Backup' : $remote_path;
         
         $response = $this->api_request('/files/list_folder', 'POST', array(
             'path' => $path,

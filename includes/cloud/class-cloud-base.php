@@ -2,14 +2,14 @@
 /**
  * Cloud Storage Base Class
  *
- * @package Auto_Backup
+ * @package Fly_Backup
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-abstract class Auto_Backup_Cloud_Base {
+abstract class Fly_Backup_Cloud_Base {
     
     protected $provider_name;
     protected $credentials;
@@ -31,7 +31,7 @@ abstract class Auto_Backup_Cloud_Base {
     }
     
     protected function log($message, $type = 'info') {
-        $logger = new Auto_Backup_Logger();
+        $logger = new Fly_Backup_Logger();
         $logger->log($message, $type, null, array('provider' => $this->provider_name));
     }
 }

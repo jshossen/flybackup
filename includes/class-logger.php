@@ -2,19 +2,19 @@
 /**
  * Logger Class
  *
- * @package Auto_Backup
+ * @package Fly_Backup
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Auto_Backup_Logger {
+class Fly_Backup_Logger {
     
     private $database;
     
     public function __construct() {
-        $this->database = new Auto_Backup_Database();
+        $this->database = new Fly_Backup_Database();
     }
     
     public function log($message, $type = 'info', $backup_id = null, $metadata = null) {
@@ -54,7 +54,7 @@ class Auto_Backup_Logger {
     
     public function cleanup_old_logs($keep_count = 1000) {
         global $wpdb;
-        $table = $wpdb->prefix . 'ab_logs';
+        $table = $wpdb->prefix . 'fly_backup_logs';
         
         $total = $wpdb->get_var("SELECT COUNT(*) FROM {$table}");
         

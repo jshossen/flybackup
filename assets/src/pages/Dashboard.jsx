@@ -38,7 +38,7 @@ const Dashboard = () => {
 
     return (
         <div className="dashboard">
-            <h1>Auto Backup Dashboard</h1>
+            <h1>Fly Backup Dashboard</h1>
             
             <div className="dashboard-stats">
                 <StatCard
@@ -114,10 +114,10 @@ const Dashboard = () => {
             </div>
 
             <div className="dashboard-actions">
-                <a href="?page=auto-backup-backups" className="button button-primary button-large">
+                <a href="?page=fly-backup-backups" className="button button-primary button-large">
                     Create Backup
                 </a>
-                <a href="?page=auto-backup-schedules" className="button button-secondary button-large">
+                <a href="?page=fly-backup-schedules" className="button button-secondary button-large">
                     Manage Schedules
                 </a>
             </div>

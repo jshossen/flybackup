@@ -2,14 +2,14 @@
 /**
  * Restore Engine Class
  *
- * @package Auto_Backup
+ * @package Fly_Backup
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Auto_Backup_Restore_Engine {
+class Fly_Backup_Restore_Engine {
 
     private $database;
     private $logger;
@@ -20,8 +20,8 @@ class Auto_Backup_Restore_Engine {
     private $temp_dir = '';
 
     public function __construct() {
-        $this->database = new Auto_Backup_Database();
-        $this->logger   = new Auto_Backup_Logger();
+        $this->database = new Fly_Backup_Database();
+        $this->logger   = new Fly_Backup_Logger();
     }
 
     /**
@@ -42,25 +42,25 @@ class Auto_Backup_Restore_Engine {
             $backup = $this->database->get_backup($backup_id);
 
             if (!$backup) {
-                throw new Exception(esc_html__('Backup not found', 'auto-backup'));
+                throw new Exception(esc_html__('Backup not found', 'fly-backup'));
             }
 
             if (!file_exists($backup->storage_location)) {
-                throw new Exception(esc_html__('Backup file not found', 'auto-backup'));
+                throw new Exception(esc_html__('Backup file not found', 'fly-backup'));
             }
 
             $this->logger->info('Restore started', $backup_id);
-            do_action('auto_backup_before_restore', $backup_id);
+            do_action('fly_backup_before_restore', $backup_id);
 
             // 1. Validate backup archive integrity.
             if (!$this->validate_backup($backup->storage_location)) {
-                throw new Exception(esc_html__('Backup file is corrupted', 'auto-backup'));
+                throw new Exception(esc_html__('Backup file is corrupted', 'fly-backup'));
             }
 
             // 2. Extract ZIP to temp directory.
-            $this->zip_manager = new Auto_Backup_Zip_Manager();
+            $this->zip_manager = new Fly_Backup_Zip_Manager();
             $this->zip_manager->open($backup->storage_location);
-            $this->temp_dir = AUTO_BACKUP_BACKUP_DIR . 'temp_restore_' . gmdate('Y-m-d_H-i-s') . '_' . wp_rand(1000, 9999) . '/';
+            $this->temp_dir = FLY_BACKUP_BACKUP_DIR . 'temp_restore_' . gmdate('Y-m-d_H-i-s') . '_' . wp_rand(1000, 9999) . '/';
             wp_mkdir_p($this->temp_dir);
             $this->zip_manager->extract($this->temp_dir);
             $this->zip_manager->close();
@@ -102,11 +102,11 @@ class Auto_Backup_Restore_Engine {
             $this->cleanup_temp_files($this->temp_dir);
 
             $this->logger->success('Restore completed successfully', $backup_id);
-            do_action('auto_backup_after_restore', $backup_id);
+            do_action('fly_backup_after_restore', $backup_id);
 
             return array(
                 'success' => true,
-                'message' => esc_html__('Restore completed successfully', 'auto-backup'),
+                'message' => esc_html__('Restore completed successfully', 'fly-backup'),
             );
 
         } catch (Exception $e) {
@@ -158,12 +158,12 @@ class Auto_Backup_Restore_Engine {
 
         if ($is_file) {
             if (!file_exists($source)) {
-                throw new Exception(esc_html__('Backup wp-config.php file not found', 'auto-backup'));
+                throw new Exception(esc_html__('Backup wp-config.php file not found', 'fly-backup'));
             }
             // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_copy -- Internal restore operation.
             $copied = copy($source, $destination);
             if (!$copied) {
-                throw new Exception(esc_html__('Failed to restore wp-config.php', 'auto-backup'));
+                throw new Exception(esc_html__('Failed to restore wp-config.php', 'fly-backup'));
             }
         } else {
             $result = $this->restore_files($source, $destination);
@@ -171,7 +171,7 @@ class Auto_Backup_Restore_Engine {
                 throw new Exception(
                     sprintf(
                         /* translators: %s: Component name */
-                        esc_html__('Failed to restore %s', 'auto-backup'),
+                        esc_html__('Failed to restore %s', 'fly-backup'),
                         esc_html($component)
                     )
                 );
@@ -205,13 +205,13 @@ class Auto_Backup_Restore_Engine {
         if ($this->should_restore_database($items, $backup_type)) {
             $db_file = $temp_dir . 'database.sql';
             if (!file_exists($db_file)) {
-                return new WP_Error('missing_db', esc_html__('Database backup file not found in archive', 'auto-backup'));
+                return new WP_Error('missing_db', esc_html__('Database backup file not found in archive', 'fly-backup'));
             }
             if (!is_readable($db_file)) {
-                return new WP_Error('unreadable_db', esc_html__('Database backup file is not readable', 'auto-backup'));
+                return new WP_Error('unreadable_db', esc_html__('Database backup file is not readable', 'fly-backup'));
             }
             if (0 === filesize($db_file)) {
-                return new WP_Error('empty_db', esc_html__('Database backup file is empty', 'auto-backup'));
+                return new WP_Error('empty_db', esc_html__('Database backup file is empty', 'fly-backup'));
             }
         }
 
@@ -233,7 +233,7 @@ class Auto_Backup_Restore_Engine {
 
             if ('wp_config' === $component) {
                 if (!file_exists($path)) {
-                    return new WP_Error('missing_wp_config', esc_html__('wp-config.php not found in backup archive', 'auto-backup'));
+                    return new WP_Error('missing_wp_config', esc_html__('wp-config.php not found in backup archive', 'fly-backup'));
                 }
 
                 // Protect wp-config.php: compare DB credentials.
@@ -241,7 +241,7 @@ class Auto_Backup_Restore_Engine {
                     if (!$confirm_wp_config) {
                         return new WP_Error(
                             'wp_config_mismatch',
-                            esc_html__('The backed-up wp-config.php contains different database credentials. Restoring it could break your site. Please confirm if you want to proceed.', 'auto-backup')
+                            esc_html__('The backed-up wp-config.php contains different database credentials. Restoring it could break your site. Please confirm if you want to proceed.', 'fly-backup')
                         );
                     }
                 }
@@ -251,7 +251,7 @@ class Auto_Backup_Restore_Engine {
                         'missing_component',
                         sprintf(
                             /* translators: %s: Component name */
-                            esc_html__('%s directory not found in backup archive', 'auto-backup'),
+                            esc_html__('%s directory not found in backup archive', 'fly-backup'),
                             esc_html(ucfirst($component))
                         )
                     );
@@ -310,7 +310,7 @@ class Auto_Backup_Restore_Engine {
      * Create a component-level snapshot of DB and/or files before restoring.
      */
     private function create_snapshot($items, $backup_type) {
-        $this->snapshot_dir = AUTO_BACKUP_BACKUP_DIR . 'restore_snapshot_' . gmdate('Y-m-d_H-i-s') . '_' . wp_rand(1000, 9999) . '/';
+        $this->snapshot_dir = FLY_BACKUP_BACKUP_DIR . 'restore_snapshot_' . gmdate('Y-m-d_H-i-s') . '_' . wp_rand(1000, 9999) . '/';
         wp_mkdir_p($this->snapshot_dir);
 
         // Snapshot database.
@@ -363,7 +363,7 @@ class Auto_Backup_Restore_Engine {
 
         $handle = fopen($output_file, 'w'); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Internal snapshot file write.
         if (false === $handle) {
-            return new WP_Error('snapshot_failed', esc_html__('Failed to create database snapshot file', 'auto-backup'));
+            return new WP_Error('snapshot_failed', esc_html__('Failed to create database snapshot file', 'fly-backup'));
         }
 
         $header  = "-- WordPress Database Snapshot\n";
@@ -571,20 +571,20 @@ class Auto_Backup_Restore_Engine {
         global $wpdb;
 
         if (!file_exists($sql_file)) {
-            throw new Exception(esc_html__('Database backup file not found', 'auto-backup'));
+            throw new Exception(esc_html__('Database backup file not found', 'fly-backup'));
         }
 
         if (0 === filesize($sql_file)) {
-            throw new Exception(esc_html__('Database backup file is empty', 'auto-backup'));
+            throw new Exception(esc_html__('Database backup file is empty', 'fly-backup'));
         }
 
         $this->logger->info('Starting database restore (streaming)', $backup_id);
 
         // Define plugin tables that should NOT be restored.
         $plugin_tables = array(
-            $wpdb->prefix . 'ab_backups',
-            $wpdb->prefix . 'ab_logs',
-            $wpdb->prefix . 'ab_schedules',
+            $wpdb->prefix . 'fly_backup_backups',
+            $wpdb->prefix . 'fly_backup_logs',
+            $wpdb->prefix . 'fly_backup_schedules',
         );
 
         $file = new SplFileObject($sql_file);
@@ -659,7 +659,7 @@ class Auto_Backup_Restore_Engine {
                                 throw new Exception(
                                     sprintf(
                                         /* translators: %s: SQL error message */
-                                        esc_html__('Critical database restore failure: %s', 'auto-backup'),
+                                        esc_html__('Critical database restore failure: %s', 'fly-backup'),
                                         esc_html($wpdb->last_error)
                                     )
                                 );
@@ -788,7 +788,7 @@ class Auto_Backup_Restore_Engine {
         $backup = $this->database->get_backup($backup_id);
 
         if (!$backup || !file_exists($backup->storage_location)) {
-            return array('error' => esc_html__('Backup not found', 'auto-backup'));
+            return array('error' => esc_html__('Backup not found', 'fly-backup'));
         }
 
         $zip = new ZipArchive();

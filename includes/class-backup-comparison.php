@@ -4,19 +4,19 @@
  *
  * Provides functionality to compare backups with current site or other backups
  *
- * @package Auto_Backup
+ * @package Fly_Backup
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Auto_Backup_Comparison {
+class Fly_Backup_Comparison {
     
     private $logger;
     
     public function __construct() {
-        $this->logger = new Auto_Backup_Logger();
+        $this->logger = new Fly_Backup_Logger();
     }
     
     /**
@@ -31,12 +31,12 @@ class Auto_Backup_Comparison {
         }
         
         // Try to download from cloud
-        if (!empty($backup->cloud_storage) && class_exists('Auto_Backup_Cloud_Manager')) {
+        if (!empty($backup->cloud_storage) && class_exists('Fly_Backup_Cloud_Manager')) {
             $cloud_storage = json_decode($backup->cloud_storage, true);
             if (!empty($cloud_storage['provider']) && !empty($cloud_storage['remote_path'])) {
                 $this->logger->info('Downloading backup from cloud for comparison: ' . $cloud_storage['provider']);
                 
-                $cloud_manager = new Auto_Backup_Cloud_Manager();
+                $cloud_manager = new Fly_Backup_Cloud_Manager();
                 $result = $cloud_manager->download_backup(
                     $cloud_storage['provider'],
                     $cloud_storage['remote_path'],
@@ -441,7 +441,7 @@ class Auto_Backup_Comparison {
     private function get_backup_record($backup_id) {
         global $wpdb;
         return $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM {$wpdb->prefix}ab_backups WHERE id = %d",
+            "SELECT * FROM {$wpdb->prefix}fly_backup_backups WHERE id = %d",
             $backup_id
         ));
     }
@@ -674,9 +674,9 @@ class Auto_Backup_Comparison {
         global $wpdb;
         
         $plugin_tables = array(
-            $wpdb->prefix . 'ab_backups',
-            $wpdb->prefix . 'ab_logs',
-            $wpdb->prefix . 'ab_schedules'
+            $wpdb->prefix . 'fly_backup_backups',
+            $wpdb->prefix . 'fly_backup_logs',
+            $wpdb->prefix . 'fly_backup_schedules'
         );
         
         $tables = array();

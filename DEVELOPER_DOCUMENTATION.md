@@ -1,4 +1,4 @@
-# Auto Backup Plugin - Developer Documentation
+# Fly Backup Plugin - Developer Documentation
 
 ## Table of Contents
 1. [Architecture Overview](#architecture-overview)
@@ -28,7 +28,7 @@ The plugin follows a **modular, class-based architecture** with clear separation
 
 ```
 WordPress Plugin
-├── Core Plugin Class (auto-backup.php)
+├── Core Plugin Class (fly-backup.php)
 ├── Database Layer (class-database.php)
 ├── Business Logic Layer
 │   ├── Backup Engine (class-backup-engine.php)
@@ -58,8 +58,8 @@ WordPress wpdb (MySQL)
 ## Directory Structure
 
 ```
-auto-backup/
-├── auto-backup.php              # Main plugin file, bootstrap
+fly-backup/
+├── fly-backup.php              # Main plugin file, bootstrap
 ├── README.md                    # User documentation
 ├── DEVELOPER_DOCUMENTATION.md   # This file
 │
@@ -106,7 +106,7 @@ auto-backup/
 
 ## Core Components
 
-### 1. Main Plugin Class (`auto-backup.php`)
+### 1. Main Plugin Class (`fly-backup.php`)
 
 **Purpose**: Bootstrap the plugin, initialize all components.
 
@@ -122,13 +122,13 @@ auto-backup/
 
 **Example - Adding a new component**:
 ```php
-// In auto-backup.php
+// In fly-backup.php
 private function load_dependencies() {
     require_once plugin_dir_path(__FILE__) . 'includes/class-new-component.php';
 }
 
 private function init_components() {
-    $this->new_component = new Auto_Backup_New_Component($this->database, $this->logger);
+    $this->new_component = new Fly_Backup_New_Component($this->database, $this->logger);
 }
 ```
 
@@ -139,9 +139,9 @@ private function init_components() {
 **Purpose**: All database operations (CRUD) for backups, schedules, and logs.
 
 **Tables**:
-- `wp_ab_backups` - Backup records
-- `wp_ab_schedules` - Scheduled backup configurations
-- `wp_ab_logs` - Activity logs
+- `wp_fly_backup_backups` - Backup records
+- `wp_fly_backup_schedules` - Scheduled backup configurations
+- `wp_fly_backup_logs` - Activity logs
 
 **Key Methods**:
 ```php
@@ -255,7 +255,7 @@ private function get_backup_items($type, $items) {
         $backup_items['custom_folder'] = WP_CONTENT_DIR . '/custom';
     }
     
-    return apply_filters('auto_backup_backup_items', $backup_items, $type, $items);
+    return apply_filters('fly_backup_backup_items', $backup_items, $type, $items);
 }
 ```
 
@@ -277,7 +277,7 @@ restore_files($source, $dest)      // Extract files
 1. restore_backup() called
 2. Extract ZIP to temp directory
 3. restore_database() - Parse and execute SQL line by line
-   - Skip plugin tables (wp_ab_backups, wp_ab_logs, wp_ab_schedules)
+   - Skip plugin tables (wp_fly_backup_backups, wp_fly_backup_logs, wp_fly_backup_schedules)
    - Execute DROP TABLE IF EXISTS
    - Execute CREATE TABLE
    - Execute INSERT statements
@@ -326,10 +326,10 @@ calculate_next_run($frequency)
 **Cron Integration**:
 ```php
 // Register cron hook
-add_action('auto_backup_run_schedule', array($this, 'run_scheduled_backup'));
+add_action('fly_backup_run_schedule', array($this, 'run_scheduled_backup'));
 
 // Schedule event
-wp_schedule_event($timestamp, $recurrence, 'auto_backup_run_schedule', array($schedule_id));
+wp_schedule_event($timestamp, $recurrence, 'fly_backup_run_schedule', array($schedule_id));
 ```
 
 **Supported Frequencies**:
@@ -349,11 +349,11 @@ wp_schedule_event($timestamp, $recurrence, 'auto_backup_run_schedule', array($sc
 
 **Purpose**: Expose backend functionality to React frontend.
 
-**Namespace**: `auto-backup/v1`
+**Namespace**: `fly-backup/v1`
 
 **Endpoint Structure**:
 ```php
-register_rest_route('auto-backup/v1', '/endpoint', array(
+register_rest_route('fly-backup/v1', '/endpoint', array(
     'methods' => 'GET|POST|PUT|DELETE',
     'callback' => array($this, 'method_name'),
     'permission_callback' => array($this, 'check_permission')
@@ -370,7 +370,7 @@ register_rest_route('auto-backup/v1', '/endpoint', array(
 **Example - Adding new endpoint**:
 ```php
 public function register_routes() {
-    register_rest_route('auto-backup/v1', '/custom-action', array(
+    register_rest_route('fly-backup/v1', '/custom-action', array(
         'methods' => 'POST',
         'callback' => array($this, 'custom_action'),
         'permission_callback' => array($this, 'check_permission')
@@ -420,10 +420,10 @@ $this->logger->error('Backup failed: ' . $error, $backup_id);
 
 ## Database Schema
 
-### Table: `wp_ab_backups`
+### Table: `wp_fly_backup_backups`
 
 ```sql
-CREATE TABLE wp_ab_backups (
+CREATE TABLE wp_fly_backup_backups (
     id bigint(20) NOT NULL AUTO_INCREMENT,
     backup_name varchar(255) NOT NULL,
     backup_type varchar(50) NOT NULL,           -- 'full', 'database', 'partial'
@@ -439,10 +439,10 @@ CREATE TABLE wp_ab_backups (
 );
 ```
 
-### Table: `wp_ab_schedules`
+### Table: `wp_fly_backup_schedules`
 
 ```sql
-CREATE TABLE wp_ab_schedules (
+CREATE TABLE wp_fly_backup_schedules (
     id bigint(20) NOT NULL AUTO_INCREMENT,
     schedule_name varchar(255) NOT NULL,
     frequency varchar(50) NOT NULL,             -- 'hourly', 'daily', 'weekly', 'monthly'
@@ -458,10 +458,10 @@ CREATE TABLE wp_ab_schedules (
 );
 ```
 
-### Table: `wp_ab_logs`
+### Table: `wp_fly_backup_logs`
 
 ```sql
-CREATE TABLE wp_ab_logs (
+CREATE TABLE wp_fly_backup_logs (
     id bigint(20) NOT NULL AUTO_INCREMENT,
     backup_id bigint(20) DEFAULT NULL,
     level varchar(20) NOT NULL,                 -- 'info', 'warning', 'error'
@@ -563,13 +563,13 @@ import apiFetch from '@wordpress/api-fetch';
 export const getBackups = async (params = {}) => {
     const query = new URLSearchParams(params).toString();
     return await apiFetch({ 
-        path: `/auto-backup/v1/backups${query ? '?' + query : ''}` 
+        path: `/fly-backup/v1/backups${query ? '?' + query : ''}` 
     });
 };
 
 export const createBackup = async (data) => {
     return await apiFetch({
-        path: '/auto-backup/v1/backups',
+        path: '/fly-backup/v1/backups',
         method: 'POST',
         data
     });
@@ -587,7 +587,7 @@ $primary-color: #2271b1;
 $danger-color: #d63638;
 
 // Base styles
-.auto-backup-admin { ... }
+.fly-backup-admin { ... }
 
 // Components
 .button { ... }
@@ -622,7 +622,7 @@ public function create_tables() {
     global $wpdb;
     
     // Add column to existing table
-    $wpdb->query("ALTER TABLE {$wpdb->prefix}ab_backups 
+    $wpdb->query("ALTER TABLE {$wpdb->prefix}fly_backup_backups 
                   ADD COLUMN notes text DEFAULT NULL");
 }
 
@@ -680,7 +680,7 @@ public function create_backup($request) {
 ```javascript
 export const createBackup = async (data) => {
     return await apiFetch({
-        path: '/auto-backup/v1/backups',
+        path: '/fly-backup/v1/backups',
         method: 'POST',
         data  // data now includes { type, items, notes }
     });
@@ -741,7 +741,7 @@ const handleCreateBackup = async () => {
 **Naming Conventions**:
 ```php
 // Classes: PascalCase with prefix
-class Auto_Backup_Component_Name { }
+class Fly_Backup_Component_Name { }
 
 // Methods: snake_case
 public function create_backup() { }
@@ -750,7 +750,7 @@ public function create_backup() { }
 $backup_id = 123;
 
 // Constants: UPPER_SNAKE_CASE
-define('AUTO_BACKUP_VERSION', '1.0.0');
+define('FLY_BACKUP_VERSION', '1.0.0');
 ```
 
 **Documentation**:
@@ -791,7 +791,7 @@ const handleCreateBackup = () => { };
 const backupId = 123;
 
 // Constants: UPPER_SNAKE_CASE
-const API_NAMESPACE = 'auto-backup/v1';
+const API_NAMESPACE = 'fly-backup/v1';
 ```
 
 **Component Structure**:
@@ -863,7 +863,7 @@ public function delete_record($id) { }
 
 1. **Register route in `class-rest-api.php`**:
 ```php
-register_rest_route('auto-backup/v1', '/endpoint', array(
+register_rest_route('fly-backup/v1', '/endpoint', array(
     'methods' => 'POST',
     'callback' => array($this, 'method_name'),
     'permission_callback' => array($this, 'check_permission')
@@ -881,7 +881,7 @@ public function method_name($request) {
 ```javascript
 export const newAction = async (data) => {
     return await apiFetch({
-        path: '/auto-backup/v1/endpoint',
+        path: '/fly-backup/v1/endpoint',
         method: 'POST',
         data
     });
@@ -947,12 +947,12 @@ SHOW TABLES LIKE 'wp_ab_%';
 
 Check backup records:
 ```sql
-SELECT * FROM wp_ab_backups ORDER BY created_at DESC LIMIT 10;
+SELECT * FROM wp_fly_backup_backups ORDER BY created_at DESC LIMIT 10;
 ```
 
 Check logs:
 ```sql
-SELECT * FROM wp_ab_logs WHERE level = 'error' ORDER BY created_at DESC LIMIT 20;
+SELECT * FROM wp_fly_backup_logs WHERE level = 'error' ORDER BY created_at DESC LIMIT 20;
 ```
 
 ---
@@ -983,36 +983,36 @@ npm run lint         # Check code style
 
 ```php
 // Before backup starts
-do_action('auto_backup_before_backup', $backup_id, $type);
+do_action('fly_backup_before_backup', $backup_id, $type);
 
 // After backup completes
-do_action('auto_backup_after_backup', $backup_id, $result);
+do_action('fly_backup_after_backup', $backup_id, $result);
 
 // Before restore starts
-do_action('auto_backup_before_restore', $backup_id);
+do_action('fly_backup_before_restore', $backup_id);
 
 // After restore completes
-do_action('auto_backup_after_restore', $backup_id, $result);
+do_action('fly_backup_after_restore', $backup_id, $result);
 ```
 
 ### Filters
 
 ```php
 // Modify backup items
-apply_filters('auto_backup_backup_items', $items, $type, $selected_items);
+apply_filters('fly_backup_backup_items', $items, $type, $selected_items);
 
 // Modify backup filename
-apply_filters('auto_backup_filename', $filename, $type);
+apply_filters('fly_backup_filename', $filename, $type);
 
 // Modify max backups to keep
-apply_filters('auto_backup_max_backups', $max_backups);
+apply_filters('fly_backup_max_backups', $max_backups);
 ```
 
 ### Usage Example
 
 ```php
 // In your theme or another plugin
-add_filter('auto_backup_backup_items', function($items, $type) {
+add_filter('fly_backup_backup_items', function($items, $type) {
     if ($type === 'full') {
         $items['custom_dir'] = WP_CONTENT_DIR . '/custom';
     }
@@ -1099,14 +1099,14 @@ When updating table schema:
 public function migrate_to_version_2() {
     global $wpdb;
     
-    $current_version = get_option('auto_backup_db_version', '1.0');
+    $current_version = get_option('fly_backup_db_version', '1.0');
     
     if (version_compare($current_version, '2.0', '<')) {
         // Add new column
-        $wpdb->query("ALTER TABLE {$wpdb->prefix}ab_backups 
+        $wpdb->query("ALTER TABLE {$wpdb->prefix}fly_backup_backups 
                       ADD COLUMN new_field varchar(255) DEFAULT NULL");
         
-        update_option('auto_backup_db_version', '2.0');
+        update_option('fly_backup_db_version', '2.0');
     }
 }
 ```

@@ -2,14 +2,14 @@
 /**
  * Database Manager
  *
- * @package Auto_Backup
+ * @package Fly_Backup
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Auto_Backup_Database {
+class Fly_Backup_Database {
     
     const DB_VERSION = '1.1.0';
     
@@ -18,9 +18,9 @@ class Auto_Backup_Database {
         
         $charset_collate = $wpdb->get_charset_collate();
         
-        $table_backups = $wpdb->prefix . 'ab_backups';
-        $table_logs = $wpdb->prefix . 'ab_logs';
-        $table_schedules = $wpdb->prefix . 'ab_schedules';
+        $table_backups = $wpdb->prefix . 'fly_backup_backups';
+        $table_logs = $wpdb->prefix . 'fly_backup_logs';
+        $table_schedules = $wpdb->prefix . 'fly_backup_schedules';
         
         $sql_backups = "CREATE TABLE IF NOT EXISTS {$table_backups} (
             id bigint(20) NOT NULL AUTO_INCREMENT,
@@ -52,7 +52,7 @@ class Auto_Backup_Database {
             KEY created_at (created_at)
         ) {$charset_collate};";
         
-        $table_cloud = $wpdb->prefix . 'ab_cloud_credentials';
+        $table_cloud = $wpdb->prefix . 'fly_backup_cloud_credentials';
         
         $sql_cloud = "CREATE TABLE IF NOT EXISTS {$table_cloud} (
             id bigint(20) NOT NULL AUTO_INCREMENT,
@@ -87,12 +87,12 @@ class Auto_Backup_Database {
         dbDelta($sql_cloud);
         dbDelta($sql_schedules);
         
-        update_option('auto_backup_db_version', self::DB_VERSION);
+        update_option('fly_backup_db_version', self::DB_VERSION);
     }
     
     public function get_backups($args = array()) {
         global $wpdb;
-        $table = $wpdb->prefix . 'ab_backups';
+        $table = $wpdb->prefix . 'fly_backup_backups';
         
         $defaults = array(
             'limit' => 20,
@@ -144,14 +144,14 @@ class Auto_Backup_Database {
     
     public function get_backup($id) {
         global $wpdb;
-        $table = $wpdb->prefix . 'ab_backups';
+        $table = $wpdb->prefix . 'fly_backup_backups';
         
         return $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE id = %d", $id));
     }
     
     public function create_backup($data) {
         global $wpdb;
-        $table = $wpdb->prefix . 'ab_backups';
+        $table = $wpdb->prefix . 'fly_backup_backups';
         
         $defaults = array(
             'backup_name' => 'backup_' . gmdate('Y-m-d_H-i-s'),
@@ -175,7 +175,7 @@ class Auto_Backup_Database {
     
     public function update_backup($id, $data) {
         global $wpdb;
-        $table = $wpdb->prefix . 'ab_backups';
+        $table = $wpdb->prefix . 'fly_backup_backups';
         
         if (isset($data['included_items']) && is_array($data['included_items'])) {
             $data['included_items'] = json_encode($data['included_items']);
@@ -186,14 +186,14 @@ class Auto_Backup_Database {
     
     public function delete_backup($id) {
         global $wpdb;
-        $table = $wpdb->prefix . 'ab_backups';
+        $table = $wpdb->prefix . 'fly_backup_backups';
         
         return $wpdb->delete($table, array('id' => $id));
     }
     
     public function get_logs($args = array()) {
         global $wpdb;
-        $table = $wpdb->prefix . 'ab_logs';
+        $table = $wpdb->prefix . 'fly_backup_logs';
         
         $defaults = array(
             'limit' => 100,
@@ -238,7 +238,7 @@ class Auto_Backup_Database {
     
     public function add_log($data) {
         global $wpdb;
-        $table = $wpdb->prefix . 'ab_logs';
+        $table = $wpdb->prefix . 'fly_backup_logs';
         
         $defaults = array(
             'backup_id' => null,
@@ -259,7 +259,7 @@ class Auto_Backup_Database {
     
     public function get_schedules($status = null) {
         global $wpdb;
-        $table = $wpdb->prefix . 'ab_schedules';
+        $table = $wpdb->prefix . 'fly_backup_schedules';
         
         if ($status) {
             return $wpdb->get_results($wpdb->prepare("SELECT * FROM {$table} WHERE status = %s ORDER BY created_at DESC", $status));
@@ -270,14 +270,14 @@ class Auto_Backup_Database {
     
     public function get_schedule($id) {
         global $wpdb;
-        $table = $wpdb->prefix . 'ab_schedules';
+        $table = $wpdb->prefix . 'fly_backup_schedules';
         
         return $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE id = %d", $id));
     }
     
     public function create_schedule($data) {
         global $wpdb;
-        $table = $wpdb->prefix . 'ab_schedules';
+        $table = $wpdb->prefix . 'fly_backup_schedules';
         
         $defaults = array(
             'schedule_name' => 'Schedule ' . gmdate('Y-m-d H:i:s'),
@@ -300,7 +300,7 @@ class Auto_Backup_Database {
     
     public function update_schedule($id, $data) {
         global $wpdb;
-        $table = $wpdb->prefix . 'ab_schedules';
+        $table = $wpdb->prefix . 'fly_backup_schedules';
         
         if (isset($data['included_items']) && is_array($data['included_items'])) {
             $data['included_items'] = json_encode($data['included_items']);
@@ -311,14 +311,14 @@ class Auto_Backup_Database {
     
     public function delete_schedule($id) {
         global $wpdb;
-        $table = $wpdb->prefix . 'ab_schedules';
+        $table = $wpdb->prefix . 'fly_backup_schedules';
         
         return $wpdb->delete($table, array('id' => $id));
     }
     
     public function get_cloud_credentials($provider = null) {
         global $wpdb;
-        $table = $wpdb->prefix . 'ab_cloud_credentials';
+        $table = $wpdb->prefix . 'fly_backup_cloud_credentials';
         
         if ($provider) {
             $row = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE provider = %s", $provider));
@@ -339,7 +339,7 @@ class Auto_Backup_Database {
     
     public function save_cloud_credentials($provider, $credentials, $settings = array(), $is_connected = false) {
         global $wpdb;
-        $table = $wpdb->prefix . 'ab_cloud_credentials';
+        $table = $wpdb->prefix . 'fly_backup_cloud_credentials';
         
         $data = array(
             'provider' => $provider,
@@ -362,14 +362,14 @@ class Auto_Backup_Database {
     
     public function delete_cloud_credentials($provider) {
         global $wpdb;
-        $table = $wpdb->prefix . 'ab_cloud_credentials';
+        $table = $wpdb->prefix . 'fly_backup_cloud_credentials';
         
         return $wpdb->delete($table, array('provider' => $provider));
     }
     
     public function get_total_backup_size() {
         global $wpdb;
-        $table = $wpdb->prefix . 'ab_backups';
+        $table = $wpdb->prefix . 'fly_backup_backups';
         
         $result = $wpdb->get_var("SELECT SUM(backup_size) FROM {$table} WHERE status = 'completed'");
         
@@ -378,7 +378,7 @@ class Auto_Backup_Database {
     
     public function get_backup_count($status = null) {
         global $wpdb;
-        $table = $wpdb->prefix . 'ab_backups';
+        $table = $wpdb->prefix . 'fly_backup_backups';
         
         if ($status) {
             return (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$table} WHERE status = %s", $status));
