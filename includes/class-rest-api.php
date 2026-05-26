@@ -606,7 +606,8 @@ class Fly_Backup_Rest_API {
     }
     
     public function get_system_requirements($request) {
-        $backup_dir = WP_CONTENT_DIR . '/flybackups';
+        $upload_dir = wp_upload_dir();
+        $backup_dir = $upload_dir['basedir'] . '/flybackup';
         
         $requirements = array(
             'php' => array(
@@ -647,8 +648,8 @@ class Fly_Backup_Rest_API {
             'disk_space' => array(
                 'name' => 'Available Disk Space',
                 'required' => '1GB or higher',
-                'current' => $this->format_bytes(disk_free_space(WP_CONTENT_DIR)),
-                'status' => disk_free_space(WP_CONTENT_DIR) >= 1073741824 ? 'pass' : 'warning',
+                'current' => $this->format_bytes(disk_free_space($backup_dir)),
+                'status' => disk_free_space($backup_dir) >= 1073741824 ? 'pass' : 'warning',
                 'critical' => false
             ),
             'write_permissions' => array(

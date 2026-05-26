@@ -32,7 +32,7 @@ delete_option('fly_backup_retention_count');
 delete_option('fly_backup_db_version');
 
 $upload_dir = wp_upload_dir();
-$backup_dir = WP_CONTENT_DIR . '/flybackups/';
+$backup_dir = $upload_dir['basedir'] . '/flybackup/';
 
 if (is_dir($backup_dir)) {
     $files = glob($backup_dir . '*');
