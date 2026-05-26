@@ -774,10 +774,11 @@ class Fly_Backup_Comparison {
         $zip->close();
         
         // Map ZIP paths to filesystem paths
+        $upload_dir = wp_upload_dir();
         $path_map = array(
-            'uploads/' => WP_CONTENT_DIR . '/uploads/',
-            'plugins/' => WP_CONTENT_DIR . '/plugins/',
-            'themes/' => WP_CONTENT_DIR . '/themes/',
+            'uploads/' => trailingslashit($upload_dir['basedir']),
+            'plugins/' => trailingslashit(WP_PLUGIN_DIR),
+            'themes/' => trailingslashit(get_theme_root()),
             'wp-config.php' => ABSPATH . 'wp-config.php'
         );
         

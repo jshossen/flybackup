@@ -127,7 +127,7 @@ class Fly_Backup_Amazon_S3 extends Fly_Backup_Cloud_Base {
         }
         
         $file_name = basename($file_path);
-        $key = 'fly-backup/' . $file_name;
+        $key = 'flybackup/' . $file_name;
         
         $file_content = file_get_contents($file_path);
         
@@ -189,7 +189,7 @@ class Fly_Backup_Amazon_S3 extends Fly_Backup_Cloud_Base {
             return array();
         }
         
-        $prefix = 'fly-backup/';
+        $prefix = 'flybackup/';
         $response = $this->s3_request('GET', '/?prefix=' . urlencode($prefix) . '&max-keys=100');
         
         if (is_wp_error($response)) {

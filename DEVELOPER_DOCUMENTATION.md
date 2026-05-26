@@ -28,7 +28,7 @@ The plugin follows a **modular, class-based architecture** with clear separation
 
 ```
 WordPress Plugin
-├── Core Plugin Class (fly-backup.php)
+├── Core Plugin Class (flybackup.php)
 ├── Database Layer (class-database.php)
 ├── Business Logic Layer
 │   ├── Backup Engine (class-backup-engine.php)
@@ -58,8 +58,8 @@ WordPress wpdb (MySQL)
 ## Directory Structure
 
 ```
-fly-backup/
-├── fly-backup.php              # Main plugin file, bootstrap
+flybackup/
+├── flybackup.php              # Main plugin file, bootstrap
 ├── README.md                    # User documentation
 ├── DEVELOPER_DOCUMENTATION.md   # This file
 │
@@ -106,7 +106,7 @@ fly-backup/
 
 ## Core Components
 
-### 1. Main Plugin Class (`fly-backup.php`)
+### 1. Main Plugin Class (`flybackup.php`)
 
 **Purpose**: Bootstrap the plugin, initialize all components.
 
@@ -122,7 +122,7 @@ fly-backup/
 
 **Example - Adding a new component**:
 ```php
-// In fly-backup.php
+// In flybackup.php
 private function load_dependencies() {
     require_once plugin_dir_path(__FILE__) . 'includes/class-new-component.php';
 }
@@ -349,11 +349,11 @@ wp_schedule_event($timestamp, $recurrence, 'fly_backup_run_schedule', array($sch
 
 **Purpose**: Expose backend functionality to React frontend.
 
-**Namespace**: `fly-backup/v1`
+**Namespace**: `flybackup/v1`
 
 **Endpoint Structure**:
 ```php
-register_rest_route('fly-backup/v1', '/endpoint', array(
+register_rest_route('flybackup/v1', '/endpoint', array(
     'methods' => 'GET|POST|PUT|DELETE',
     'callback' => array($this, 'method_name'),
     'permission_callback' => array($this, 'check_permission')
@@ -370,7 +370,7 @@ register_rest_route('fly-backup/v1', '/endpoint', array(
 **Example - Adding new endpoint**:
 ```php
 public function register_routes() {
-    register_rest_route('fly-backup/v1', '/custom-action', array(
+    register_rest_route('flybackup/v1', '/custom-action', array(
         'methods' => 'POST',
         'callback' => array($this, 'custom_action'),
         'permission_callback' => array($this, 'check_permission')
@@ -563,13 +563,13 @@ import apiFetch from '@wordpress/api-fetch';
 export const getBackups = async (params = {}) => {
     const query = new URLSearchParams(params).toString();
     return await apiFetch({ 
-        path: `/fly-backup/v1/backups${query ? '?' + query : ''}` 
+        path: `/flybackup/v1/backups${query ? '?' + query : ''}` 
     });
 };
 
 export const createBackup = async (data) => {
     return await apiFetch({
-        path: '/fly-backup/v1/backups',
+        path: '/flybackup/v1/backups',
         method: 'POST',
         data
     });
@@ -587,7 +587,7 @@ $primary-color: #2271b1;
 $danger-color: #d63638;
 
 // Base styles
-.fly-backup-admin { ... }
+.flybackup-admin { ... }
 
 // Components
 .button { ... }
@@ -680,7 +680,7 @@ public function create_backup($request) {
 ```javascript
 export const createBackup = async (data) => {
     return await apiFetch({
-        path: '/fly-backup/v1/backups',
+        path: '/flybackup/v1/backups',
         method: 'POST',
         data  // data now includes { type, items, notes }
     });
@@ -791,7 +791,7 @@ const handleCreateBackup = () => { };
 const backupId = 123;
 
 // Constants: UPPER_SNAKE_CASE
-const API_NAMESPACE = 'fly-backup/v1';
+const API_NAMESPACE = 'flybackup/v1';
 ```
 
 **Component Structure**:
@@ -863,7 +863,7 @@ public function delete_record($id) { }
 
 1. **Register route in `class-rest-api.php`**:
 ```php
-register_rest_route('fly-backup/v1', '/endpoint', array(
+register_rest_route('flybackup/v1', '/endpoint', array(
     'methods' => 'POST',
     'callback' => array($this, 'method_name'),
     'permission_callback' => array($this, 'check_permission')
@@ -881,7 +881,7 @@ public function method_name($request) {
 ```javascript
 export const newAction = async (data) => {
     return await apiFetch({
-        path: '/fly-backup/v1/endpoint',
+        path: '/flybackup/v1/endpoint',
         method: 'POST',
         data
     });

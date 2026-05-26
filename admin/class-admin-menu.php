@@ -18,93 +18,93 @@ class Fly_Backup_Admin_Menu {
     
     public function register_menu() {
         add_menu_page(
-            __('Fly Backup', 'fly-backup'),
-            __('Fly Backup', 'fly-backup'),
+            __('Fly Backup', 'flybackup'),
+            __('Fly Backup', 'flybackup'),
             'manage_options',
-            'fly-backup',
+            'flybackup',
             array($this, 'render_page'),
             'dashicons-backup',
             30
         );
         
         add_submenu_page(
-            'fly-backup',
-            __('Dashboard', 'fly-backup'),
-            __('Dashboard', 'fly-backup'),
+            'flybackup',
+            __('Dashboard', 'flybackup'),
+            __('Dashboard', 'flybackup'),
             'manage_options',
-            'fly-backup',
+            'flybackup',
             array($this, 'render_page')
         );
         
         add_submenu_page(
-            'fly-backup',
-            __('Backups', 'fly-backup'),
-            __('Backups', 'fly-backup'),
+            'flybackup',
+            __('Backups', 'flybackup'),
+            __('Backups', 'flybackup'),
             'manage_options',
-            'fly-backup-backups',
+            'flybackup-backups',
             array($this, 'render_page')
         );
         
         add_submenu_page(
-            'fly-backup',
-            __('Restore', 'fly-backup'),
-            __('Restore', 'fly-backup'),
+            'flybackup',
+            __('Restore', 'flybackup'),
+            __('Restore', 'flybackup'),
             'manage_options',
-            'fly-backup-restore',
+            'flybackup-restore',
             array($this, 'render_page')
         );
         
         add_submenu_page(
-            'fly-backup',
-            __('Backup Details', 'fly-backup'),
+            'flybackup',
+            __('Backup Details', 'flybackup'),
             null,
             'manage_options',
-            'fly-backup-backup-details',
+            'flybackup-backup-details',
             array($this, 'render_page')
         );
         
         add_submenu_page(
-            'fly-backup',
-            __('Schedules', 'fly-backup'),
-            __('Schedules', 'fly-backup'),
+            'flybackup',
+            __('Schedules', 'flybackup'),
+            __('Schedules', 'flybackup'),
             'manage_options',
-            'fly-backup-schedules',
+            'flybackup-schedules',
             array($this, 'render_page')
         );
         
         add_submenu_page(
-            'fly-backup',
-            __('Settings', 'fly-backup'),
-            __('Settings', 'fly-backup'),
+            'flybackup',
+            __('Settings', 'flybackup'),
+            __('Settings', 'flybackup'),
             'manage_options',
-            'fly-backup-settings',
+            'flybackup-settings',
             array($this, 'render_page')
         );
         
         add_submenu_page(
-            'fly-backup',
-            __('Compare', 'fly-backup'),
-            __('Compare', 'fly-backup'),
+            'flybackup',
+            __('Compare', 'flybackup'),
+            __('Compare', 'flybackup'),
             'manage_options',
-            'fly-backup-compare',
+            'flybackup-compare',
             array($this, 'render_page')
         );
         
         add_submenu_page(
-            'fly-backup',
-            __('Cloud Storage', 'fly-backup'),
-            __('Cloud Storage', 'fly-backup'),
+            'flybackup',
+            __('Cloud Storage', 'flybackup'),
+            __('Cloud Storage', 'flybackup'),
             'manage_options',
-            'fly-backup-cloud',
+            'flybackup-cloud',
             array($this, 'render_page')
         );
         
         add_submenu_page(
-            'fly-backup',
-            __('Logs', 'fly-backup'),
-            __('Logs', 'fly-backup'),
+            'flybackup',
+            __('Logs', 'flybackup'),
+            __('Logs', 'flybackup'),
             'manage_options',
-            'fly-backup-logs',
+            'flybackup-logs',
             array($this, 'render_page')
         );
     }
@@ -112,42 +112,42 @@ class Fly_Backup_Admin_Menu {
     public function render_page() {
         ?>
         <div class="wrap">
-            <div id="fly-backup-app"></div>
+            <div id="flybackup-app"></div>
         </div>
         <?php
     }
     
     public function enqueue_assets($hook) {
-        if (strpos($hook, 'fly-backup') === false) {
+        if (strpos($hook, 'flybackup') === false) {
             return;
         }
         
         wp_enqueue_style(
-            'fly-backup-admin',
+            'flybackup-admin',
             FLY_BACKUP_PLUGIN_URL . 'assets/css/admin-style.css',
             array(),
             FLY_BACKUP_VERSION
         );
         
         wp_enqueue_script(
-            'fly-backup-admin',
+            'flybackup-admin',
             FLY_BACKUP_PLUGIN_URL . 'assets/js/admin-script.js',
             array('wp-api-fetch', 'wp-i18n'),
             FLY_BACKUP_VERSION,
             true
         );
         
-        wp_localize_script('fly-backup-admin', 'autoBackupData', array(
-            'apiUrl' => rest_url('fly-backup/v1'),
+        wp_localize_script('flybackup-admin', 'autoBackupData', array(
+            'apiUrl' => rest_url('flybackup/v1'),
             'nonce' => wp_create_nonce('fly_backup_nonce'),
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'pluginUrl' => FLY_BACKUP_PLUGIN_URL,
-            'currentPage' => isset($_GET['page']) ? sanitize_text_field($_GET['page']) : 'fly-backup',
+            'currentPage' => isset($_GET['page']) ? sanitize_text_field($_GET['page']) : 'flybackup',
             'strings' => array(
-                'confirmDelete' => __('Are you sure you want to delete this backup?', 'fly-backup'),
-                'confirmRestore' => __('Are you sure you want to restore this backup? This will overwrite your current site.', 'fly-backup'),
-                'backupInProgress' => __('Backup in progress...', 'fly-backup'),
-                'restoreInProgress' => __('Restore in progress...', 'fly-backup')
+                'confirmDelete' => __('Are you sure you want to delete this backup?', 'flybackup'),
+                'confirmRestore' => __('Are you sure you want to restore this backup? This will overwrite your current site.', 'flybackup'),
+                'backupInProgress' => __('Backup in progress...', 'flybackup'),
+                'restoreInProgress' => __('Restore in progress...', 'flybackup')
             )
         ));
     }

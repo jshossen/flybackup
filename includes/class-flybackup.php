@@ -103,7 +103,7 @@ final class Fly_Backup {
     }
     
     public function load_textdomain() {
-        load_plugin_textdomain('fly-backup', false, dirname(FLY_BACKUP_PLUGIN_BASENAME) . '/languages');
+        load_plugin_textdomain('flybackup', false, dirname(FLY_BACKUP_PLUGIN_BASENAME) . '/languages');
     }
     
     public static function activate() {

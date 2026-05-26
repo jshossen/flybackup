@@ -16,9 +16,9 @@ npm start
 npm run build
 ```
 - Builds optimized production assets
-- Reads version from `fly-backup.php` header
+- Reads version from `flybackup.php` header
 - Creates `build/` folder in plugin root
-- Creates `build/fly-backup-{version}.zip` (Free version)
+- Creates `build/flybackup-{version}.zip` (Free version)
 - ZIP file is ready to upload to WordPress
 - Excludes development files (node_modules, src files, etc.)
 
@@ -27,8 +27,8 @@ npm run build
 npm run build:pro
 ```
 - Builds optimized production assets
-- Reads version from `fly-backup.php` header
-- Creates `build/fly-backup-pro-{version}.zip` (Pro version)
+- Reads version from `flybackup.php` header
+- Creates `build/flybackup-pro-{version}.zip` (Pro version)
 - Includes all pro features (cloud storage, migration, real-time, licensing)
 - Ready for commercial distribution
 
@@ -52,7 +52,7 @@ npm run clean
 | Feature | Free Build | Pro Build |
 |---------|-----------|-----------|
 | **Command** | `npm run build` | `npm run build:pro` |
-| **Output File** | `fly-backup-{version}.zip` | `fly-backup-pro-{version}.zip` |
+| **Output File** | `flybackup-{version}.zip` | `flybackup-pro-{version}.zip` |
 | **Core Features** | ✅ All included | ✅ All included |
 | **Pro Features** | ⚠️ Skeleton only | ✅ Fully functional |
 | **Cloud Storage** | ❌ Skeleton | ✅ Google Drive, Dropbox, S3 |
@@ -64,7 +64,7 @@ npm run clean
 ## What Gets Included in ZIP
 
 ### ✅ Included (Both Versions)
-- `fly-backup.php` (main plugin file)
+- `flybackup.php` (main plugin file)
 - `uninstall.php`
 - `readme.txt` & `README.md`
 - `composer.json`
@@ -89,7 +89,7 @@ npm run clean
 
 ## Version Management
 
-The version is automatically read from the plugin header in `fly-backup.php`:
+The version is automatically read from the plugin header in `flybackup.php`:
 
 ```php
 /**
@@ -98,7 +98,7 @@ The version is automatically read from the plugin header in `fly-backup.php`:
 ```
 
 To release a new version:
-1. Update version in `fly-backup.php` header
+1. Update version in `flybackup.php` header
 2. Update version in `package.json` (optional, for consistency)
 3. Run `npm run build`
 4. ZIP file will be named with the new version
@@ -108,18 +108,18 @@ To release a new version:
 After running `npm run build`, you'll see:
 
 ```
-📦 Building fly-backup-1.0.0.zip...
+📦 Building flybackup-1.0.0.zip...
 📌 Version: 1.0.0
 [... file list ...]
 ✅ Build complete!
-📦 File: /path/to/build/fly-backup-1.0.0.zip
+📦 File: /path/to/build/flybackup-1.0.0.zip
 📊 Size: 0.09 MB
 🚀 Ready to upload to WordPress!
 ```
 
 The ZIP file will be located at:
 ```
-/Users/jshossen/Local Sites/fly-backup/app/public/wp-content/plugins/fly-backup/build/fly-backup-1.0.0.zip
+/Users/jshossen/Local Sites/flybackup/app/public/wp-content/plugins/flybackup/build/flybackup-1.0.0.zip
 ```
 
 ## Troubleshooting
@@ -128,7 +128,7 @@ The ZIP file will be located at:
 - Install zip utility: `brew install zip` (macOS) or `apt-get install zip` (Linux)
 
 ### Version not detected
-- Check that `fly-backup.php` has the version header:
+- Check that `flybackup.php` has the version header:
   ```php
   * Version: 1.0.0
   ```
@@ -156,7 +156,7 @@ npm start
 
 ### Preparing for Release
 ```bash
-# Update version in fly-backup.php
+# Update version in flybackup.php
 # Example: Version: 1.1.0
 
 # Clean old builds

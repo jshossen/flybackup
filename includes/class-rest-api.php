@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
 
 class Fly_Backup_Rest_API {
     
-    private $namespace = 'fly-backup/v1';
+    private $namespace = 'flybackup/v1';
     private $database;
     private $backup_engine;
     private $restore_engine;
@@ -606,7 +606,7 @@ class Fly_Backup_Rest_API {
     }
     
     public function get_system_requirements($request) {
-        $backup_dir = WP_CONTENT_DIR . '/fly-backups';
+        $backup_dir = WP_CONTENT_DIR . '/flybackups';
         
         $requirements = array(
             'php' => array(

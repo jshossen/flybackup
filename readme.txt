@@ -117,7 +117,7 @@ Whether you're running a personal blog, business website, or e-commerce store, F
 = FTP Installation =
 
 1. Download and extract the plugin ZIP file
-2. Upload the `fly-backup` folder to `/wp-content/plugins/` directory via FTP
+2. Upload the `flybackup` folder to `/wp-content/plugins/` directory via FTP
 3. Log in to your WordPress admin dashboard
 4. Navigate to Plugins → Installed Plugins
 5. Find "FlyBackup" and click "Activate"
@@ -135,7 +135,7 @@ Whether you're running a personal blog, business website, or e-commerce store, F
 
 = Where are backups stored? =
 
-By default, backups are stored in `/wp-content/fly-backups/` directory on your server. Each backup is saved as a ZIP file with a timestamp. Pro version will add cloud storage options (Google Drive, Dropbox, Amazon S3, OneDrive).
+By default, backups are stored in `/wp-content/flybackups/` directory on your server. Each backup is saved as a ZIP file with a timestamp. Pro version will add cloud storage options (Google Drive, Dropbox, Amazon S3, OneDrive).
 
 = How large can my backups be? =
 
@@ -234,15 +234,60 @@ Initial release of FlyBackup. Create your first automated WordPress backup today
 
 == Privacy Policy ==
 
-FlyBackup does not collect, store, or transmit any personal data or website information to external servers. All backups are stored locally on your server in the `/wp-content/fly-backups/` directory. The plugin operates entirely within your WordPress installation and respects your privacy.
+FlyBackup does not collect, store, or transmit any personal data or website information to external servers. All backups are stored locally on your server in the `/wp-content/uploads/flybackup/` directory. The plugin operates entirely within your WordPress installation and respects your privacy.
 
 When you use the Pro version's cloud storage features (coming soon), your backup files will be transmitted to your chosen cloud provider (Google Drive, Dropbox, Amazon S3, or OneDrive) using their official APIs. You control which cloud services to use and can disconnect them at any time.
+
+== External Services ==
+
+This plugin can optionally connect to third-party cloud storage services to store your backups remotely. **These features are optional** and disabled by default. No data is sent to external services unless you explicitly configure and enable cloud storage in the Pro version.
+
+= Supported Cloud Storage Providers =
+
+**Amazon S3 (AWS)**
+
+* **Purpose**: Store backup files in Amazon S3 buckets for secure cloud storage
+* **Data Sent**: Backup ZIP files are uploaded to your configured S3 bucket when cloud storage is enabled
+* **When**: Only when you enable S3 storage in Pro version and a backup is created or manually uploaded
+* **Service Provider**: Amazon Web Services, Inc.
+* **Terms of Service**: https://aws.amazon.com/service-terms/
+* **Privacy Policy**: https://aws.amazon.com/privacy/
+
+**Google Drive**
+
+* **Purpose**: Store backup files in your Google Drive account
+* **Data Sent**: Backup ZIP files are uploaded to your Google Drive when cloud storage is enabled
+* **When**: Only when you enable Google Drive storage in Pro version and a backup is created or manually uploaded
+* **Authentication**: Uses OAuth 2.0 with scope `https://www.googleapis.com/auth/drive.file` (access only to files created by this plugin)
+* **Service Provider**: Google LLC
+* **Terms of Service**: https://policies.google.com/terms
+* **Privacy Policy**: https://policies.google.com/privacy
+
+**Dropbox**
+
+* **Purpose**: Store backup files in your Dropbox account
+* **Data Sent**: Backup ZIP files are uploaded to your Dropbox when cloud storage is enabled
+* **When**: Only when you enable Dropbox storage in Pro version and a backup is created or manually uploaded
+* **Authentication**: Uses OAuth 2.0 for secure access to your Dropbox account
+* **Service Provider**: Dropbox, Inc.
+* **Terms of Service**: https://www.dropbox.com/terms
+* **Privacy Policy**: https://www.dropbox.com/privacy
+
+= Important Notes =
+
+* Cloud storage is **completely optional** and must be manually configured in the Pro version
+* No data is transmitted to any external service by default
+* You maintain full control over which services to use
+* You can disconnect any cloud service at any time
+* All cloud connections use official APIs with OAuth authentication
+* Backup files are only uploaded when you explicitly enable cloud storage
+* The free version stores all backups locally on your server only
 
 == Support ==
 
 For support, please visit:
-* WordPress.org support forums: https://wordpress.org/support/plugin/fly-backup/
-* GitHub repository: https://github.com/jshossen/fly-backup
+* WordPress.org support forums: https://wordpress.org/support/plugin/flybackup/
+* GitHub repository: https://github.com/jshossen/flybackup
 * Documentation: Available in the plugin's Help section
 * Bug reports: Use the WordPress.org support forums or GitHub Issues
 
@@ -250,7 +295,7 @@ For support, please visit:
 
 FlyBackup is open source and welcomes contributions. If you'd like to contribute code, report bugs, or suggest features:
 
-* GitHub repository: https://github.com/jshossen/fly-backup
+* GitHub repository: https://github.com/jshossen/flybackup
 * Submit pull requests on GitHub
 * Report issues on GitHub Issues
 * Join discussions in WordPress.org support forums

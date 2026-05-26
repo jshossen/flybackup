@@ -194,7 +194,7 @@ class Fly_Backup_Health_Check {
             'php_version' => PHP_VERSION,
             'wordpress_version' => get_bloginfo('version'),
             'mysql_version' => $wpdb->db_version(),
-            'server_software' => $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown',
+            'server_software' => isset($_SERVER['SERVER_SOFTWARE']) ? sanitize_text_field($_SERVER['SERVER_SOFTWARE']) : 'Unknown',
             'memory_limit' => ini_get('memory_limit'),
             'max_execution_time' => ini_get('max_execution_time'),
             'upload_max_filesize' => ini_get('upload_max_filesize'),

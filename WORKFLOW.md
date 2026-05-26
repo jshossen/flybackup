@@ -27,7 +27,7 @@ npm start
 # Webpack automatically rebuilds
 
 # Test in WordPress admin
-# Navigate to: wp-admin/admin.php?page=fly-backup
+# Navigate to: wp-admin/admin.php?page=flybackup
 ```
 
 ### 2. Testing Production Build
@@ -46,7 +46,7 @@ npm run build:assets
 
 #### Step 1: Update Version
 ```php
-// In fly-backup.php
+// In flybackup.php
 /**
  * Version: 1.1.0  ← Update this
  */
@@ -66,21 +66,21 @@ npm run build:assets
 #### Step 3: Build Free Version
 ```bash
 npm run build
-# Creates: build/fly-backup-1.1.0.zip
+# Creates: build/flybackup-1.1.0.zip
 ```
 
 #### Step 4: Test ZIP
 ```bash
 # Extract and test on clean WordPress install
-unzip -q build/fly-backup-1.1.0.zip -d /tmp/test-plugin
+unzip -q build/flybackup-1.1.0.zip -d /tmp/test-plugin
 # Install and activate in test environment
 ```
 
 #### Step 5: Upload to WordPress.org
 ```bash
 # Use SVN to upload to WordPress.org repository
-svn co https://plugins.svn.wordpress.org/fly-backup
-cd fly-backup
+svn co https://plugins.svn.wordpress.org/flybackup
+cd flybackup
 # Copy files to trunk/
 # Update assets/
 svn ci -m "Release version 1.1.0"
@@ -92,7 +92,7 @@ svn ci -m "Release version 1.1.0"
 
 #### Step 1: Update Version
 ```php
-// In fly-backup.php
+// In flybackup.php
 /**
  * Version: 1.1.0  ← Update this
  */
@@ -110,7 +110,7 @@ svn ci -m "Release version 1.1.0"
 #### Step 3: Build Pro Version
 ```bash
 npm run build:pro
-# Creates: build/fly-backup-pro-1.1.0.zip
+# Creates: build/flybackup-pro-1.1.0.zip
 ```
 
 #### Step 4: Test Pro Features
@@ -137,7 +137,7 @@ npm run build:pro
 When releasing both free and pro versions:
 
 ```bash
-# 1. Update version in fly-backup.php
+# 1. Update version in flybackup.php
 # Version: 1.2.0
 
 # 2. Build both versions
@@ -146,8 +146,8 @@ npm run build:pro      # Pro version
 
 # 3. Verify both ZIPs
 ls -lh build/
-# fly-backup-1.2.0.zip      (Free)
-# fly-backup-pro-1.2.0.zip  (Pro)
+# flybackup-1.2.0.zip      (Free)
+# flybackup-pro-1.2.0.zip  (Pro)
 
 # 4. Test both versions
 # - Install free version on test site
@@ -163,7 +163,7 @@ ls -lh build/
 
 ### Free Version
 ```
-build/fly-backup-1.0.0.zip
+build/flybackup-1.0.0.zip
 ├── Core features (backup, restore, schedule)
 ├── Basic UI
 ├── Local storage only
@@ -172,7 +172,7 @@ build/fly-backup-1.0.0.zip
 
 ### Pro Version
 ```
-build/fly-backup-pro-1.0.0.zip
+build/flybackup-pro-1.0.0.zip
 ├── Core features (backup, restore, schedule)
 ├── Advanced UI
 ├── Local + Cloud storage
@@ -197,7 +197,7 @@ brew install zip  # macOS
 
 **Problem**: Version not detected
 ```bash
-# Solution: Check fly-backup.php header format
+# Solution: Check flybackup.php header format
 # Must be: * Version: 1.0.0
 ```
 
@@ -243,7 +243,7 @@ Follow semantic versioning (SemVer):
 
 ### Before Every Release
 
-- [ ] Update version in `fly-backup.php`
+- [ ] Update version in `flybackup.php`
 - [ ] Update changelog in `readme.txt`
 - [ ] Run `npm run clean`
 - [ ] Run tests (if available)

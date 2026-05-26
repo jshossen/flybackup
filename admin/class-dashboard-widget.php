@@ -13,12 +13,26 @@ class Fly_Backup_Dashboard_Widget {
     
     public function __construct() {
         add_action('wp_dashboard_setup', array($this, 'register_widget'));
+        add_action('admin_enqueue_scripts', array($this, 'enqueue_styles'));
+    }
+    
+    public function enqueue_styles($hook) {
+        if ($hook !== 'index.php') {
+            return;
+        }
+        
+        wp_enqueue_style(
+            'flybackup-dashboard-widget',
+            FLY_BACKUP_PLUGIN_URL . 'assets/css/dashboard-widget.css',
+            array(),
+            FLY_BACKUP_VERSION
+        );
     }
     
     public function register_widget() {
         wp_add_dashboard_widget(
             'fly_backup_widget',
-            __('Fly Backup Status', 'fly-backup'),
+            __('Fly Backup Status', 'flybackup'),
             array($this, 'render_widget')
         );
     }
@@ -41,77 +55,48 @@ class Fly_Backup_Dashboard_Widget {
         }
         
         ?>
-        <div class="fly-backup-dashboard-widget">
-            <style>
-                .fly-backup-dashboard-widget {
-                    padding: 10px 0;
-                }
-                .fly-backup-stat {
-                    margin-bottom: 15px;
-                    padding-bottom: 15px;
-                    border-bottom: 1px solid #f0f0f0;
-                }
-                .fly-backup-stat:last-child {
-                    border-bottom: none;
-                    margin-bottom: 0;
-                }
-                .fly-backup-stat-label {
-                    font-weight: 600;
-                    color: #23282d;
-                    margin-bottom: 5px;
-                }
-                .fly-backup-stat-value {
-                    color: #72aee6;
-                    font-size: 14px;
-                }
-                .fly-backup-actions {
-                    margin-top: 15px;
-                    padding-top: 15px;
-                    border-top: 1px solid #f0f0f0;
-                }
-            </style>
-            
+        <div class="flybackup-dashboard-widget">
             <?php if ($newest_backup): ?>
-                <div class="fly-backup-stat">
-                    <div class="fly-backup-stat-label"><?php esc_html_e('Last Backup', 'fly-backup'); ?></div>
-                    <div class="fly-backup-stat-value">
+                <div class="flybackup-stat">
+                    <div class="flybackup-stat-label"><?php esc_html_e('Last Backup', 'flybackup'); ?></div>
+                    <div class="flybackup-stat-value">
                         <?php echo esc_html(fly_backup_time_ago($newest_backup->created_at)); ?>
                         (<?php echo esc_html(fly_backup_format_bytes($newest_backup->backup_size)); ?>)
                     </div>
                 </div>
             <?php else: ?>
-                <div class="fly-backup-stat">
-                    <div class="fly-backup-stat-label"><?php esc_html_e('Last Backup', 'fly-backup'); ?></div>
-                    <div class="fly-backup-stat-value"><?php esc_html_e('No backups yet', 'fly-backup'); ?></div>
+                <div class="flybackup-stat">
+                    <div class="flybackup-stat-label"><?php esc_html_e('Last Backup', 'flybackup'); ?></div>
+                    <div class="flybackup-stat-value"><?php esc_html_e('No backups yet', 'flybackup'); ?></div>
                 </div>
             <?php endif; ?>
             
             <?php if ($next_scheduled): ?>
-                <div class="fly-backup-stat">
-                    <div class="fly-backup-stat-label"><?php esc_html_e('Next Scheduled Backup', 'fly-backup'); ?></div>
-                    <div class="fly-backup-stat-value">
+                <div class="flybackup-stat">
+                    <div class="flybackup-stat-label"><?php esc_html_e('Next Scheduled Backup', 'flybackup'); ?></div>
+                    <div class="flybackup-stat-value">
                         <?php echo esc_html($next_scheduled->schedule_name); ?> -
                         <?php echo esc_html(gmdate('M j, Y g:i A', strtotime($next_scheduled->next_run))); ?>
                     </div>
                 </div>
             <?php else: ?>
-                <div class="fly-backup-stat">
-                    <div class="fly-backup-stat-label"><?php esc_html_e('Next Scheduled Backup', 'fly-backup'); ?></div>
-                    <div class="fly-backup-stat-value"><?php esc_html_e('No schedules configured', 'fly-backup'); ?></div>
+                <div class="flybackup-stat">
+                    <div class="flybackup-stat-label"><?php esc_html_e('Next Scheduled Backup', 'flybackup'); ?></div>
+                    <div class="flybackup-stat-value"><?php esc_html_e('No schedules configured', 'flybackup'); ?></div>
                 </div>
             <?php endif; ?>
             
-            <div class="fly-backup-stat">
-                <div class="fly-backup-stat-label"><?php esc_html_e('Total Backups', 'fly-backup'); ?></div>
-                <div class="fly-backup-stat-value">
+            <div class="flybackup-stat">
+                <div class="flybackup-stat-label"><?php esc_html_e('Total Backups', 'flybackup'); ?></div>
+                <div class="flybackup-stat-value">
                     <?php echo esc_html($storage['backup_count']); ?> 
                     (<?php echo esc_html($storage['total_size_formatted']); ?>)
                 </div>
             </div>
             
-            <div class="fly-backup-actions">
-                <a href="<?php echo esc_url(admin_url('admin.php?page=fly-backup')); ?>" class="button button-primary">
-                    <?php esc_html_e('Manage Backups', 'fly-backup'); ?>
+            <div class="flybackup-actions">
+                <a href="<?php echo esc_url(admin_url('admin.php?page=flybackup')); ?>" class="button button-primary">
+                    <?php esc_html_e('Manage Backups', 'flybackup'); ?>
                 </a>
             </div>
         </div>

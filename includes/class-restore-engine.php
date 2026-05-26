@@ -42,11 +42,11 @@ class Fly_Backup_Restore_Engine {
             $backup = $this->database->get_backup($backup_id);
 
             if (!$backup) {
-                throw new Exception(esc_html__('Backup not found', 'fly-backup'));
+                throw new Exception(esc_html__('Backup not found', 'flybackup'));
             }
 
             if (!file_exists($backup->storage_location)) {
-                throw new Exception(esc_html__('Backup file not found', 'fly-backup'));
+                throw new Exception(esc_html__('Backup file not found', 'flybackup'));
             }
 
             $this->logger->info('Restore started', $backup_id);
@@ -54,7 +54,7 @@ class Fly_Backup_Restore_Engine {
 
             // 1. Validate backup archive integrity.
             if (!$this->validate_backup($backup->storage_location)) {
-                throw new Exception(esc_html__('Backup file is corrupted', 'fly-backup'));
+                throw new Exception(esc_html__('Backup file is corrupted', 'flybackup'));
             }
 
             // 2. Extract ZIP to temp directory.
@@ -91,9 +91,10 @@ class Fly_Backup_Restore_Engine {
 
             // 6. Restore files.
             if ($backup->backup_type === 'full' || $backup->backup_type === 'partial') {
-                $this->restore_file_component('uploads', $items, $this->temp_dir . 'uploads', WP_CONTENT_DIR . '/uploads', $backup_id);
-                $this->restore_file_component('plugins', $items, $this->temp_dir . 'plugins', WP_CONTENT_DIR . '/plugins', $backup_id);
-                $this->restore_file_component('themes', $items, $this->temp_dir . 'themes', WP_CONTENT_DIR . '/themes', $backup_id);
+                $upload_dir = wp_upload_dir();
+                $this->restore_file_component('uploads', $items, $this->temp_dir . 'uploads', $upload_dir['basedir'], $backup_id);
+                $this->restore_file_component('plugins', $items, $this->temp_dir . 'plugins', WP_PLUGIN_DIR, $backup_id);
+                $this->restore_file_component('themes', $items, $this->temp_dir . 'themes', get_theme_root(), $backup_id);
                 $this->restore_file_component('wp_config', $items, $this->temp_dir . 'wp-config/wp-config.php', ABSPATH . 'wp-config.php', $backup_id, true);
             }
 
@@ -106,7 +107,7 @@ class Fly_Backup_Restore_Engine {
 
             return array(
                 'success' => true,
-                'message' => esc_html__('Restore completed successfully', 'fly-backup'),
+                'message' => esc_html__('Restore completed successfully', 'flybackup'),
             );
 
         } catch (Exception $e) {
@@ -158,12 +159,12 @@ class Fly_Backup_Restore_Engine {
 
         if ($is_file) {
             if (!file_exists($source)) {
-                throw new Exception(esc_html__('Backup wp-config.php file not found', 'fly-backup'));
+                throw new Exception(esc_html__('Backup wp-config.php file not found', 'flybackup'));
             }
             // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_copy -- Internal restore operation.
             $copied = copy($source, $destination);
             if (!$copied) {
-                throw new Exception(esc_html__('Failed to restore wp-config.php', 'fly-backup'));
+                throw new Exception(esc_html__('Failed to restore wp-config.php', 'flybackup'));
             }
         } else {
             $result = $this->restore_files($source, $destination);
@@ -171,7 +172,7 @@ class Fly_Backup_Restore_Engine {
                 throw new Exception(
                     sprintf(
                         /* translators: %s: Component name */
-                        esc_html__('Failed to restore %s', 'fly-backup'),
+                        esc_html__('Failed to restore %s', 'flybackup'),
                         esc_html($component)
                     )
                 );
@@ -205,13 +206,13 @@ class Fly_Backup_Restore_Engine {
         if ($this->should_restore_database($items, $backup_type)) {
             $db_file = $temp_dir . 'database.sql';
             if (!file_exists($db_file)) {
-                return new WP_Error('missing_db', esc_html__('Database backup file not found in archive', 'fly-backup'));
+                return new WP_Error('missing_db', esc_html__('Database backup file not found in archive', 'flybackup'));
             }
             if (!is_readable($db_file)) {
-                return new WP_Error('unreadable_db', esc_html__('Database backup file is not readable', 'fly-backup'));
+                return new WP_Error('unreadable_db', esc_html__('Database backup file is not readable', 'flybackup'));
             }
             if (0 === filesize($db_file)) {
-                return new WP_Error('empty_db', esc_html__('Database backup file is empty', 'fly-backup'));
+                return new WP_Error('empty_db', esc_html__('Database backup file is empty', 'flybackup'));
             }
         }
 
@@ -233,7 +234,7 @@ class Fly_Backup_Restore_Engine {
 
             if ('wp_config' === $component) {
                 if (!file_exists($path)) {
-                    return new WP_Error('missing_wp_config', esc_html__('wp-config.php not found in backup archive', 'fly-backup'));
+                    return new WP_Error('missing_wp_config', esc_html__('wp-config.php not found in backup archive', 'flybackup'));
                 }
 
                 // Protect wp-config.php: compare DB credentials.
@@ -241,7 +242,7 @@ class Fly_Backup_Restore_Engine {
                     if (!$confirm_wp_config) {
                         return new WP_Error(
                             'wp_config_mismatch',
-                            esc_html__('The backed-up wp-config.php contains different database credentials. Restoring it could break your site. Please confirm if you want to proceed.', 'fly-backup')
+                            esc_html__('The backed-up wp-config.php contains different database credentials. Restoring it could break your site. Please confirm if you want to proceed.', 'flybackup')
                         );
                     }
                 }
@@ -251,7 +252,7 @@ class Fly_Backup_Restore_Engine {
                         'missing_component',
                         sprintf(
                             /* translators: %s: Component name */
-                            esc_html__('%s directory not found in backup archive', 'fly-backup'),
+                            esc_html__('%s directory not found in backup archive', 'flybackup'),
                             esc_html(ucfirst($component))
                         )
                     );
@@ -332,13 +333,14 @@ class Fly_Backup_Restore_Engine {
 
                 switch ($component) {
                     case 'uploads':
-                        $this->snapshot_files(WP_CONTENT_DIR . '/uploads', $this->snapshot_dir . 'uploads');
+                        $upload_dir = wp_upload_dir();
+                        $this->snapshot_files($upload_dir['basedir'], $this->snapshot_dir . 'uploads');
                         break;
                     case 'plugins':
-                        $this->snapshot_files(WP_CONTENT_DIR . '/plugins', $this->snapshot_dir . 'plugins');
+                        $this->snapshot_files(WP_PLUGIN_DIR, $this->snapshot_dir . 'plugins');
                         break;
                     case 'themes':
-                        $this->snapshot_files(WP_CONTENT_DIR . '/themes', $this->snapshot_dir . 'themes');
+                        $this->snapshot_files(get_theme_root(), $this->snapshot_dir . 'themes');
                         break;
                     case 'wp_config':
                         if (file_exists(ABSPATH . 'wp-config.php')) {
@@ -363,7 +365,7 @@ class Fly_Backup_Restore_Engine {
 
         $handle = fopen($output_file, 'w'); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Internal snapshot file write.
         if (false === $handle) {
-            return new WP_Error('snapshot_failed', esc_html__('Failed to create database snapshot file', 'fly-backup'));
+            return new WP_Error('snapshot_failed', esc_html__('Failed to create database snapshot file', 'flybackup'));
         }
 
         $header  = "-- WordPress Database Snapshot\n";
@@ -478,13 +480,14 @@ class Fly_Backup_Restore_Engine {
                     $this->rollback_database();
                     break;
                 case 'uploads':
-                    $this->rollback_files($this->snapshot_dir . 'uploads', WP_CONTENT_DIR . '/uploads');
+                    $upload_dir = wp_upload_dir();
+                    $this->rollback_files($this->snapshot_dir . 'uploads', $upload_dir['basedir']);
                     break;
                 case 'plugins':
-                    $this->rollback_files($this->snapshot_dir . 'plugins', WP_CONTENT_DIR . '/plugins');
+                    $this->rollback_files($this->snapshot_dir . 'plugins', WP_PLUGIN_DIR);
                     break;
                 case 'themes':
-                    $this->rollback_files($this->snapshot_dir . 'themes', WP_CONTENT_DIR . '/themes');
+                    $this->rollback_files($this->snapshot_dir . 'themes', get_theme_root());
                     break;
                 case 'wp_config':
                     if (file_exists($this->snapshot_dir . 'wp-config/wp-config.php')) {
@@ -571,11 +574,11 @@ class Fly_Backup_Restore_Engine {
         global $wpdb;
 
         if (!file_exists($sql_file)) {
-            throw new Exception(esc_html__('Database backup file not found', 'fly-backup'));
+            throw new Exception(esc_html__('Database backup file not found', 'flybackup'));
         }
 
         if (0 === filesize($sql_file)) {
-            throw new Exception(esc_html__('Database backup file is empty', 'fly-backup'));
+            throw new Exception(esc_html__('Database backup file is empty', 'flybackup'));
         }
 
         $this->logger->info('Starting database restore (streaming)', $backup_id);
@@ -659,7 +662,7 @@ class Fly_Backup_Restore_Engine {
                                 throw new Exception(
                                     sprintf(
                                         /* translators: %s: SQL error message */
-                                        esc_html__('Critical database restore failure: %s', 'fly-backup'),
+                                        esc_html__('Critical database restore failure: %s', 'flybackup'),
                                         esc_html($wpdb->last_error)
                                     )
                                 );
@@ -788,7 +791,7 @@ class Fly_Backup_Restore_Engine {
         $backup = $this->database->get_backup($backup_id);
 
         if (!$backup || !file_exists($backup->storage_location)) {
-            return array('error' => esc_html__('Backup not found', 'fly-backup'));
+            return array('error' => esc_html__('Backup not found', 'flybackup'));
         }
 
         $zip = new ZipArchive();

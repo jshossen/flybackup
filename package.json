@@ -1,5 +1,5 @@
 {
-  "name": "fly-backup",
+  "name": "flybackup",
   "version": "1.0.0",
   "description": "Fast, reliable WordPress backups that just work",
   "main": "assets/src/index.js",

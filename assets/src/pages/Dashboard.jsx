@@ -114,10 +114,10 @@ const Dashboard = () => {
             </div>
 
             <div className="dashboard-actions">
-                <a href="?page=fly-backup-backups" className="button button-primary button-large">
+                <a href="?page=flybackup-backups" className="button button-primary button-large">
                     Create Backup
                 </a>
-                <a href="?page=fly-backup-schedules" className="button button-secondary button-large">
+                <a href="?page=flybackup-schedules" className="button button-secondary button-large">
                     Manage Schedules
                 </a>
             </div>

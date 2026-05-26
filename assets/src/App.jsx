@@ -10,7 +10,7 @@ import Logs from './pages/Logs';
 import CloudSettings from './pages/CloudSettings';
 
 const App = () => {
-    const [currentPage, setCurrentPage] = useState('fly-backup');
+    const [currentPage, setCurrentPage] = useState('flybackup');
 
     useEffect(() => {
         if (window.autoBackupData && window.autoBackupData.currentPage) {
@@ -24,83 +24,83 @@ const App = () => {
         const backupId = urlParams.get('backup_id');
         
         switch (page || currentPage) {
-            case 'fly-backup-backup-details':
+            case 'flybackup-backup-details':
                 return backupId ? <BackupDetails /> : <Backups />;
-            case 'fly-backup-compare':
+            case 'flybackup-compare':
                 return <Compare />;
-            case 'fly-backup-backups':
+            case 'flybackup-backups':
                 return <Backups />;
-            case 'fly-backup-restore':
+            case 'flybackup-restore':
                 return <Restore />;
-            case 'fly-backup-schedules':
+            case 'flybackup-schedules':
                 return <Schedules />;
-            case 'fly-backup-settings':
+            case 'flybackup-settings':
                 return <Settings />;
-            case 'fly-backup-cloud':
+            case 'flybackup-cloud':
                 return <CloudSettings />;
-            case 'fly-backup-logs':
+            case 'flybackup-logs':
                 return <Logs />;
-            case 'fly-backup':
+            case 'flybackup':
             default:
                 return <Dashboard />;
         }
     };
 
     return (
-        <div className="fly-backup-container">
-            <nav className="fly-backup-nav">
+        <div className="flybackup-container">
+            <nav className="flybackup-nav">
                 <ul>
-                    <li className={currentPage === 'fly-backup' ? 'active' : ''}>
-                        <a href="?page=fly-backup">
+                    <li className={currentPage === 'flybackup' ? 'active' : ''}>
+                        <a href="?page=flybackup">
                             <span className="dashicons dashicons-dashboard"></span>
                             Dashboard
                         </a>
                     </li>
-                    <li className={currentPage === 'fly-backup-backups' ? 'active' : ''}>
-                        <a href="?page=fly-backup-backups">
+                    <li className={currentPage === 'flybackup-backups' ? 'active' : ''}>
+                        <a href="?page=flybackup-backups">
                             <span className="dashicons dashicons-backup"></span>
                             Backups
                         </a>
                     </li>
-                    <li className={currentPage === 'fly-backup-restore' ? 'active' : ''}>
-                        <a href="?page=fly-backup-restore">
+                    <li className={currentPage === 'flybackup-restore' ? 'active' : ''}>
+                        <a href="?page=flybackup-restore">
                             <span className="dashicons dashicons-update"></span>
                             Restore
                         </a>
                     </li>
-                    <li className={currentPage === 'fly-backup-schedules' ? 'active' : ''}>
-                        <a href="?page=fly-backup-schedules">
+                    <li className={currentPage === 'flybackup-schedules' ? 'active' : ''}>
+                        <a href="?page=flybackup-schedules">
                             <span className="dashicons dashicons-clock"></span>
                             Schedules
                         </a>
                     </li>
-                    <li className={currentPage === 'fly-backup-settings' ? 'active' : ''}>
-                        <a href="?page=fly-backup-settings">
+                    <li className={currentPage === 'flybackup-settings' ? 'active' : ''}>
+                        <a href="?page=flybackup-settings">
                             <span className="dashicons dashicons-admin-settings"></span>
                             Settings
                         </a>
                     </li>
-                    <li className={currentPage === 'fly-backup-compare' ? 'active' : ''}>
-                        <a href="?page=fly-backup-compare">
+                    <li className={currentPage === 'flybackup-compare' ? 'active' : ''}>
+                        <a href="?page=flybackup-compare">
                             <span className="dashicons dashicons-image-flip-horizontal"></span>
                             Compare
                         </a>
                     </li>
-                    <li className={currentPage === 'fly-backup-cloud' ? 'active' : ''}>
-                        <a href="?page=fly-backup-cloud">
+                    <li className={currentPage === 'flybackup-cloud' ? 'active' : ''}>
+                        <a href="?page=flybackup-cloud">
                             <span className="dashicons dashicons-cloud"></span>
                             Cloud
                         </a>
                     </li>
-                    <li className={currentPage === 'fly-backup-logs' ? 'active' : ''}>
-                        <a href="?page=fly-backup-logs">
+                    <li className={currentPage === 'flybackup-logs' ? 'active' : ''}>
+                        <a href="?page=flybackup-logs">
                             <span className="dashicons dashicons-list-view"></span>
                             Logs
                         </a>
                     </li>
                 </ul>
             </nav>
-            <div className="fly-backup-content">
+            <div className="flybackup-content">
                 {renderPage()}
             </div>
         </div>

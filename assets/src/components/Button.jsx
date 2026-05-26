@@ -10,10 +10,10 @@ const Button = ({
     type = 'button',
     className = ''
 }) => {
-    const baseClasses = 'fly-backup-button';
-    const variantClasses = `fly-backup-button--${variant}`;
-    const sizeClasses = `fly-backup-button--${size}`;
-    const disabledClass = disabled ? 'fly-backup-button--disabled' : '';
+    const baseClasses = 'flybackup-button';
+    const variantClasses = `flybackup-button--${variant}`;
+    const sizeClasses = `flybackup-button--${size}`;
+    const disabledClass = disabled ? 'flybackup-button--disabled' : '';
     
     const allClasses = [baseClasses, variantClasses, sizeClasses, disabledClass, className]
         .filter(Boolean)
@@ -26,8 +26,8 @@ const Button = ({
             onClick={onClick}
             disabled={disabled}
         >
-            {icon && <span className="fly-backup-button__icon">{icon}</span>}
-            <span className="fly-backup-button__text">{children}</span>
+            {icon && <span className="flybackup-button__icon">{icon}</span>}
+            <span className="flybackup-button__text">{children}</span>
         </button>
     );
 };

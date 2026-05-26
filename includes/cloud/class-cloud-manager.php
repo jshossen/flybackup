@@ -152,7 +152,7 @@ class Fly_Backup_Cloud_Manager {
             return null;
         }
         
-        $temp_dir = wp_upload_dir()['basedir'] . '/fly-backup/temp/';
+        $temp_dir = wp_upload_dir()['basedir'] . '/flybackup/temp/';
         if (!file_exists($temp_dir)) {
             wp_mkdir_p($temp_dir);
         }

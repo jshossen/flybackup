@@ -31,7 +31,7 @@ Fly Backup is a modern, lightweight WordPress backup plugin designed for beginne
 
 ## Installation
 
-1. Upload the `fly-backup` folder to `/wp-content/plugins/`
+1. Upload the `flybackup` folder to `/wp-content/plugins/`
 2. Activate the plugin through the 'Plugins' menu in WordPress
 3. Navigate to **Fly Backup** in your WordPress admin menu
 4. Configure your backup settings and create your first backup
@@ -62,8 +62,8 @@ Fly Backup is a modern, lightweight WordPress backup plugin designed for beginne
    npm run build
    # This will:
    # - Build optimized React assets
-   # - Read version from fly-backup.php
-   # - Create build/fly-backup-{version}.zip
+   # - Read version from flybackup.php
+   # - Create build/flybackup-{version}.zip
    # - Ready to upload to WordPress!
    ```
 
@@ -103,20 +103,20 @@ Fly Backup is a modern, lightweight WordPress backup plugin designed for beginne
 - `wp_fly_backup_schedules` - Scheduled backup configuration
 
 ### REST API Endpoints
-- `GET /wp-json/fly-backup/v1/backups` - List backups
-- `POST /wp-json/fly-backup/v1/backups` - Create backup
-- `DELETE /wp-json/fly-backup/v1/backups/{id}` - Delete backup
-- `POST /wp-json/fly-backup/v1/backups/{id}/restore` - Restore backup
-- `GET /wp-json/fly-backup/v1/schedules` - List schedules
-- `GET /wp-json/fly-backup/v1/health` - Health status
-- `GET /wp-json/fly-backup/v1/logs` - View logs
-- `GET /wp-json/fly-backup/v1/settings` - Get settings
+- `GET /wp-json/flybackup/v1/backups` - List backups
+- `POST /wp-json/flybackup/v1/backups` - Create backup
+- `DELETE /wp-json/flybackup/v1/backups/{id}` - Delete backup
+- `POST /wp-json/flybackup/v1/backups/{id}/restore` - Restore backup
+- `GET /wp-json/flybackup/v1/schedules` - List schedules
+- `GET /wp-json/flybackup/v1/health` - Health status
+- `GET /wp-json/flybackup/v1/logs` - View logs
+- `GET /wp-json/flybackup/v1/settings` - Get settings
 
 ## File Structure
 
 ```
-fly-backup/
-├── fly-backup.php          # Main plugin file
+flybackup/
+├── flybackup.php          # Main plugin file
 ├── uninstall.php            # Uninstall cleanup
 ├── readme.txt               # WordPress.org readme
 ├── package.json             # NPM dependencies
@@ -126,7 +126,7 @@ fly-backup/
 │   ├── js/                  # Compiled JavaScript
 │   └── css/                 # Compiled CSS
 ├── includes/                # PHP classes
-│   ├── class-fly-backup.php
+│   ├── class-flybackup.php
 │   ├── class-backup-engine.php
 │   ├── class-restore-engine.php
 │   ├── class-scheduler.php
@@ -188,7 +188,7 @@ fly-backup/
 
 ### Backup Fails
 - Check disk space
-- Verify write permissions on `/wp-content/fly-backups/`
+- Verify write permissions on `/wp-content/flybackups/`
 - Increase PHP memory limit
 - Check error logs
 

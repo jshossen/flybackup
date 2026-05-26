@@ -363,23 +363,25 @@ class Fly_Backup_Backup_Engine {
         // If items array is provided, use it regardless of type
         if (!empty($items)) {
             if (in_array('uploads', $items)) {
-                $backup_items['uploads'] = WP_CONTENT_DIR . '/uploads';
+                $upload_dir = wp_upload_dir();
+                $backup_items['uploads'] = $upload_dir['basedir'];
             }
             if (in_array('plugins', $items)) {
-                $backup_items['plugins'] = WP_CONTENT_DIR . '/plugins';
+                $backup_items['plugins'] = WP_PLUGIN_DIR;
             }
             if (in_array('themes', $items)) {
-                $backup_items['themes'] = WP_CONTENT_DIR . '/themes';
+                $backup_items['themes'] = get_theme_root();
             }
             if (in_array('wp-config', $items)) {
                 $backup_items['wp-config'] = ABSPATH . 'wp-config.php';
             }
         } elseif ($type === 'full') {
             // Only use default full backup if items array is empty
+            $upload_dir = wp_upload_dir();
             $backup_items = array(
-                'uploads' => WP_CONTENT_DIR . '/uploads',
-                'plugins' => WP_CONTENT_DIR . '/plugins',
-                'themes' => WP_CONTENT_DIR . '/themes',
+                'uploads' => $upload_dir['basedir'],
+                'plugins' => WP_PLUGIN_DIR,
+                'themes' => get_theme_root(),
                 'wp-config' => ABSPATH . 'wp-config.php'
             );
         }
@@ -419,15 +421,16 @@ class Fly_Backup_Backup_Engine {
         }
         
         if (in_array('uploads', $items)) {
-            $total_size += fly_backup_get_directory_size(WP_CONTENT_DIR . '/uploads');
+            $upload_dir = wp_upload_dir();
+            $total_size += fly_backup_get_directory_size($upload_dir['basedir']);
         }
         
         if (in_array('plugins', $items)) {
-            $total_size += fly_backup_get_directory_size(WP_CONTENT_DIR . '/plugins');
+            $total_size += fly_backup_get_directory_size(WP_PLUGIN_DIR);
         }
         
         if (in_array('themes', $items)) {
-            $total_size += fly_backup_get_directory_size(WP_CONTENT_DIR . '/themes');
+            $total_size += fly_backup_get_directory_size(get_theme_root());
         }
         
         if (in_array('wp_config', $items)) {

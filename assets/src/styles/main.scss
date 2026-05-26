@@ -1,9 +1,9 @@
-.fly-backup-container {
+.flybackup-container {
     max-width: 1200px;
     margin: 20px 0;
 }
 
-.fly-backup-nav {
+.flybackup-nav {
     background: #fff;
     border: 1px solid #ccd0d4;
     margin-bottom: 20px;
@@ -328,7 +328,7 @@
 }
 
 // Button Component
-.fly-backup-button {
+.flybackup-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -365,12 +365,12 @@
         background: #2271b1;
         color: #fff;
         
-        &:hover:not(.fly-backup-button--disabled) {
+        &:hover:not(.flybackup-button--disabled) {
             background: #135e96;
             color: #fff;
         }
         
-        &:active:not(.fly-backup-button--disabled) {
+        &:active:not(.flybackup-button--disabled) {
             background: #0a4b78;
         }
     }
@@ -380,13 +380,13 @@
         color: #2271b1;
         border: 1px solid #2271b1;
         
-        &:hover:not(.fly-backup-button--disabled) {
+        &:hover:not(.flybackup-button--disabled) {
             background: #f6f7f7;
             border-color: #135e96;
             color: #135e96;
         }
         
-        &:active:not(.fly-backup-button--disabled) {
+        &:active:not(.flybackup-button--disabled) {
             background: #e5e5e5;
         }
     }
@@ -395,12 +395,12 @@
         background: #d63638;
         color: #fff;
         
-        &:hover:not(.fly-backup-button--disabled) {
+        &:hover:not(.flybackup-button--disabled) {
             background: #b32d2e;
             color: #fff;
         }
         
-        &:active:not(.fly-backup-button--disabled) {
+        &:active:not(.flybackup-button--disabled) {
             background: #8a2424;
         }
     }
@@ -409,12 +409,12 @@
         background: #00a32a;
         color: #fff;
         
-        &:hover:not(.fly-backup-button--disabled) {
+        &:hover:not(.flybackup-button--disabled) {
             background: #008a20;
             color: #fff;
         }
         
-        &:active:not(.fly-backup-button--disabled) {
+        &:active:not(.flybackup-button--disabled) {
             background: #007017;
         }
     }
@@ -424,12 +424,12 @@
         color: #2271b1;
         border: 1px solid transparent;
         
-        &:hover:not(.fly-backup-button--disabled) {
+        &:hover:not(.flybackup-button--disabled) {
             background: #f6f7f7;
             color: #135e96;
         }
         
-        &:active:not(.fly-backup-button--disabled) {
+        &:active:not(.flybackup-button--disabled) {
             background: #e5e5e5;
         }
     }
@@ -439,7 +439,7 @@
         padding: 4px 12px;
         font-size: 13px;
         
-        .fly-backup-button__icon {
+        .flybackup-button__icon {
             font-size: 14px;
             
             .dashicons {
@@ -459,7 +459,7 @@
         padding: 12px 24px;
         font-size: 16px;
         
-        .fly-backup-button__icon {
+        .flybackup-button__icon {
             font-size: 18px;
             
             .dashicons {

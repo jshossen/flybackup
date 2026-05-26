@@ -69,10 +69,11 @@ function fly_backup_generate_backup_filename($type = 'full') {
 function fly_backup_get_site_size() {
     $size = 0;
     
+    $upload_dir = wp_upload_dir();
     $paths = array(
-        WP_CONTENT_DIR . '/uploads',
-        WP_CONTENT_DIR . '/plugins',
-        WP_CONTENT_DIR . '/themes'
+        $upload_dir['basedir'],
+        WP_PLUGIN_DIR,
+        get_theme_root()
     );
     
     foreach ($paths as $path) {
@@ -122,7 +123,8 @@ function fly_backup_get_available_disk_space() {
     $backup_dir = fly_backup_get_backup_dir();
     
     if (!file_exists($backup_dir)) {
-        $backup_dir = WP_CONTENT_DIR;
+        $upload_dir = wp_upload_dir();
+        $backup_dir = $upload_dir['basedir'];
     }
     
     return @disk_free_space($backup_dir);
@@ -132,7 +134,8 @@ function fly_backup_is_writable() {
     $backup_dir = fly_backup_get_backup_dir();
     
     if (!file_exists($backup_dir)) {
-        return wp_is_writable(WP_CONTENT_DIR);
+        $upload_dir = wp_upload_dir();
+        return wp_is_writable($upload_dir['basedir']);
     }
     
     return wp_is_writable($backup_dir);
@@ -180,7 +183,7 @@ function fly_backup_get_excluded_paths() {
         '.git',
         '.svn',
         'node_modules',
-        'fly-backups'
+        'flybackups'
     ));
 }
 

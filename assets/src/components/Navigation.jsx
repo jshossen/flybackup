@@ -2,16 +2,16 @@ import React from 'react';
 
 const Navigation = ({ currentPage }) => {
     const menuItems = [
-        { id: 'fly-backup', label: 'Dashboard', icon: 'dashicons-dashboard' },
-        { id: 'fly-backup-backups', label: 'Backups', icon: 'dashicons-backup' },
-        { id: 'fly-backup-restore', label: 'Restore', icon: 'dashicons-update' },
-        { id: 'fly-backup-schedules', label: 'Schedules', icon: 'dashicons-clock' },
-        { id: 'fly-backup-settings', label: 'Settings', icon: 'dashicons-admin-settings' },
-        { id: 'fly-backup-logs', label: 'Logs', icon: 'dashicons-list-view' }
+        { id: 'flybackup', label: 'Dashboard', icon: 'dashicons-dashboard' },
+        { id: 'flybackup-backups', label: 'Backups', icon: 'dashicons-backup' },
+        { id: 'flybackup-restore', label: 'Restore', icon: 'dashicons-update' },
+        { id: 'flybackup-schedules', label: 'Schedules', icon: 'dashicons-clock' },
+        { id: 'flybackup-settings', label: 'Settings', icon: 'dashicons-admin-settings' },
+        { id: 'flybackup-logs', label: 'Logs', icon: 'dashicons-list-view' }
     ];
 
     return (
-        <nav className="fly-backup-nav">
+        <nav className="flybackup-nav">
             <ul>
                 {menuItems.map(item => (
                     <li key={item.id} className={currentPage === item.id ? 'active' : ''}>

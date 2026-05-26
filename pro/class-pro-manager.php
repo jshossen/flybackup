@@ -43,10 +43,10 @@ class Fly_Backup_Pro_Manager {
     }
     
     public function add_cloud_storage_locations($locations) {
-        $locations['google_drive'] = __('Google Drive', 'fly-backup');
-        $locations['dropbox'] = __('Dropbox', 'fly-backup');
-        $locations['amazon_s3'] = __('Amazon S3', 'fly-backup');
-        $locations['onedrive'] = __('OneDrive', 'fly-backup');
+        $locations['google_drive'] = __('Google Drive', 'flybackup');
+        $locations['dropbox'] = __('Dropbox', 'flybackup');
+        $locations['amazon_s3'] = __('Amazon S3', 'flybackup');
+        $locations['onedrive'] = __('OneDrive', 'flybackup');
         
         return $locations;
     }
