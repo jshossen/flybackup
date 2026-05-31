@@ -148,7 +148,7 @@ class Fly_Backup_Zip_Manager {
             }
         }
         
-        return fly_backup_should_exclude_file($file_path);
+        return flybackup_should_exclude_file($file_path);
     }
     
     public function extract($destination) {

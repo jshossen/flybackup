@@ -13,8 +13,8 @@ const App = () => {
     const [currentPage, setCurrentPage] = useState('flybackup');
 
     useEffect(() => {
-        if (window.autoBackupData && window.autoBackupData.currentPage) {
-            setCurrentPage(window.autoBackupData.currentPage);
+        if (window.flybackupData && window.flybackupData.currentPage) {
+            setCurrentPage(window.flybackupData.currentPage);
         }
     }, []);
 

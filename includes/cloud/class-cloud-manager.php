@@ -29,7 +29,7 @@ class Fly_Backup_Cloud_Manager {
         );
         
         foreach ($provider_map as $provider => $class_name) {
-            $class_file = FLY_BACKUP_PLUGIN_DIR . 'includes/cloud/class-' . str_replace('_', '-', $provider) . '.php';
+            $class_file = FLYBACKUP_PLUGIN_DIR . 'includes/cloud/class-' . str_replace('_', '-', $provider) . '.php';
             if (file_exists($class_file)) {
                 require_once $class_file;
                 if (class_exists($class_name)) {
@@ -40,7 +40,7 @@ class Fly_Backup_Cloud_Manager {
     }
     
     private function encrypt_credentials($credentials) {
-        $key = wp_hash('fly_backup_cloud_key');
+        $key = wp_hash('flybackup_cloud_key');
         $json = json_encode($credentials);
         $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length('AES-256-CBC'));
         $encrypted = openssl_encrypt($json, 'AES-256-CBC', $key, 0, $iv);
@@ -48,7 +48,7 @@ class Fly_Backup_Cloud_Manager {
     }
     
     private function decrypt_credentials($encrypted_data) {
-        $key = wp_hash('fly_backup_cloud_key');
+        $key = wp_hash('flybackup_cloud_key');
         $parts = explode('::', base64_decode($encrypted_data), 2);
         if (count($parts) !== 2) {
             return array();

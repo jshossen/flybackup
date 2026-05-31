@@ -20,25 +20,25 @@ class Fly_Backup_Pro_Manager {
             $this->load_pro_features();
         }
         
-        add_filter('fly_backup_storage_locations', array($this, 'add_cloud_storage_locations'));
-        add_filter('fly_backup_backup_items', array($this, 'add_pro_backup_items'), 10, 3);
+        add_filter('flybackup_storage_locations', array($this, 'add_cloud_storage_locations'));
+        add_filter('flybackup_backup_items', array($this, 'add_pro_backup_items'), 10, 3);
     }
     
     private function check_pro_status() {
-        $this->is_pro_active = apply_filters('fly_backup_is_pro_active', false);
+        $this->is_pro_active = apply_filters('flybackup_is_pro_active', false);
     }
     
     private function load_pro_features() {
-        if (file_exists(FLY_BACKUP_PLUGIN_DIR . 'pro/migration/class-migration-tool.php')) {
-            require_once FLY_BACKUP_PLUGIN_DIR . 'pro/migration/class-migration-tool.php';
+        if (file_exists(FLYBACKUP_PLUGIN_DIR . 'pro/migration/class-migration-tool.php')) {
+            require_once FLYBACKUP_PLUGIN_DIR . 'pro/migration/class-migration-tool.php';
         }
         
-        if (file_exists(FLY_BACKUP_PLUGIN_DIR . 'pro/realtime/class-realtime-backup.php')) {
-            require_once FLY_BACKUP_PLUGIN_DIR . 'pro/realtime/class-realtime-backup.php';
+        if (file_exists(FLYBACKUP_PLUGIN_DIR . 'pro/realtime/class-realtime-backup.php')) {
+            require_once FLYBACKUP_PLUGIN_DIR . 'pro/realtime/class-realtime-backup.php';
         }
         
-        if (file_exists(FLY_BACKUP_PLUGIN_DIR . 'pro/licensing/class-license-manager.php')) {
-            require_once FLY_BACKUP_PLUGIN_DIR . 'pro/licensing/class-license-manager.php';
+        if (file_exists(FLYBACKUP_PLUGIN_DIR . 'pro/licensing/class-license-manager.php')) {
+            require_once FLYBACKUP_PLUGIN_DIR . 'pro/licensing/class-license-manager.php';
         }
     }
     
@@ -56,7 +56,7 @@ class Fly_Backup_Pro_Manager {
             return $items;
         }
         
-        return apply_filters('fly_backup_pro_backup_items', $items, $type, $selected_items);
+        return apply_filters('flybackup_pro_backup_items', $items, $type, $selected_items);
     }
     
     public function is_pro() {

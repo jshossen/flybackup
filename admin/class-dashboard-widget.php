@@ -23,15 +23,15 @@ class Fly_Backup_Dashboard_Widget {
         
         wp_enqueue_style(
             'flybackup-dashboard-widget',
-            FLY_BACKUP_PLUGIN_URL . 'assets/css/dashboard-widget.css',
+            FLYBACKUP_PLUGIN_URL . 'assets/css/dashboard-widget.css',
             array(),
-            FLY_BACKUP_VERSION
+            FLYBACKUP_VERSION
         );
     }
     
     public function register_widget() {
         wp_add_dashboard_widget(
-            'fly_backup_widget',
+            'flybackup_widget',
             __('Fly Backup Status', 'flybackup'),
             array($this, 'render_widget')
         );
@@ -60,8 +60,8 @@ class Fly_Backup_Dashboard_Widget {
                 <div class="flybackup-stat">
                     <div class="flybackup-stat-label"><?php esc_html_e('Last Backup', 'flybackup'); ?></div>
                     <div class="flybackup-stat-value">
-                        <?php echo esc_html(fly_backup_time_ago($newest_backup->created_at)); ?>
-                        (<?php echo esc_html(fly_backup_format_bytes($newest_backup->backup_size)); ?>)
+                        <?php echo esc_html(flybackup_time_ago($newest_backup->created_at)); ?>
+                        (<?php echo esc_html(flybackup_format_bytes($newest_backup->backup_size)); ?>)
                     </div>
                 </div>
             <?php else: ?>

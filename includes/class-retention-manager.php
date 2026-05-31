@@ -20,8 +20,8 @@ class Fly_Backup_Retention_Manager {
     }
     
     public function cleanup() {
-        $retention_count = get_option('fly_backup_retention_count', 5);
-        $retention_count = apply_filters('fly_backup_retention_policy', $retention_count);
+        $retention_count = get_option('flybackup_retention_count', 5);
+        $retention_count = apply_filters('flybackup_retention_policy', $retention_count);
         
         $backups = $this->database->get_backups(array(
             'limit' => 1000,
@@ -60,14 +60,14 @@ class Fly_Backup_Retention_Manager {
     public function get_storage_usage() {
         $total_size = $this->database->get_total_backup_size();
         $backup_count = $this->database->get_backup_count('completed');
-        $available_space = fly_backup_get_available_disk_space();
+        $available_space = flybackup_get_available_disk_space();
         
         return array(
             'total_size' => $total_size,
-            'total_size_formatted' => fly_backup_format_bytes($total_size),
+            'total_size_formatted' => flybackup_format_bytes($total_size),
             'backup_count' => $backup_count,
             'available_space' => $available_space,
-            'available_space_formatted' => fly_backup_format_bytes($available_space)
+            'available_space_formatted' => flybackup_format_bytes($available_space)
         );
     }
     

@@ -23,7 +23,7 @@ if (!function_exists('wp_rmdir')) {
     }
 }
 
-function fly_backup_format_bytes($bytes, $precision = 2) {
+function flybackup_format_bytes($bytes, $precision = 2) {
     $units = array('B', 'KB', 'MB', 'GB', 'TB');
     
     $bytes = max($bytes, 0);
@@ -35,7 +35,7 @@ function fly_backup_format_bytes($bytes, $precision = 2) {
     return round($bytes, $precision) . ' ' . $units[$pow];
 }
 
-function fly_backup_get_settings() {
+function flybackup_get_settings() {
     $defaults = array(
         'email_notifications' => false,
         'notification_email' => get_option('admin_email'),
@@ -48,25 +48,25 @@ function fly_backup_get_settings() {
         )
     );
     
-    $settings = get_option('fly_backup_settings', array());
+    $settings = get_option('flybackup_settings', array());
     
     return wp_parse_args($settings, $defaults);
 }
 
-function fly_backup_update_settings($settings) {
-    return update_option('fly_backup_settings', $settings);
+function flybackup_update_settings($settings) {
+    return update_option('flybackup_settings', $settings);
 }
 
-function fly_backup_get_backup_dir() {
-    return FLY_BACKUP_BACKUP_DIR;
+function flybackup_get_backup_dir() {
+    return FLYBACKUP_BACKUP_DIR;
 }
 
-function fly_backup_generate_backup_filename($type = 'full') {
+function flybackup_generate_backup_filename($type = 'full') {
     $hash = substr(md5(uniqid(wp_rand(), true)), 0, 8);
     return 'backup_' . $type . '_' . gmdate('Y-m-d_H-i-s') . '_' . $hash . '.zip';
 }
 
-function fly_backup_get_site_size() {
+function flybackup_get_site_size() {
     $size = 0;
     
     $upload_dir = wp_upload_dir();
@@ -78,14 +78,14 @@ function fly_backup_get_site_size() {
     
     foreach ($paths as $path) {
         if (is_dir($path)) {
-            $size += fly_backup_get_directory_size($path);
+            $size += flybackup_get_directory_size($path);
         }
     }
     
     return $size;
 }
 
-function fly_backup_get_directory_size($path) {
+function flybackup_get_directory_size($path) {
     $size = 0;
     
     if (!is_dir($path)) {
@@ -106,7 +106,7 @@ function fly_backup_get_directory_size($path) {
     return $size;
 }
 
-function fly_backup_get_database_size() {
+function flybackup_get_database_size() {
     global $wpdb;
     
     $size = 0;
@@ -119,8 +119,8 @@ function fly_backup_get_database_size() {
     return $size;
 }
 
-function fly_backup_get_available_disk_space() {
-    $backup_dir = fly_backup_get_backup_dir();
+function flybackup_get_available_disk_space() {
+    $backup_dir = flybackup_get_backup_dir();
     
     if (!file_exists($backup_dir)) {
         $upload_dir = wp_upload_dir();
@@ -130,8 +130,8 @@ function fly_backup_get_available_disk_space() {
     return @disk_free_space($backup_dir);
 }
 
-function fly_backup_is_writable() {
-    $backup_dir = fly_backup_get_backup_dir();
+function flybackup_is_writable() {
+    $backup_dir = flybackup_get_backup_dir();
     
     if (!file_exists($backup_dir)) {
         $upload_dir = wp_upload_dir();
@@ -141,7 +141,7 @@ function fly_backup_is_writable() {
     return wp_is_writable($backup_dir);
 }
 
-function fly_backup_get_php_memory_limit() {
+function flybackup_get_php_memory_limit() {
     $memory_limit = ini_get('memory_limit');
     
     if (preg_match('/^(\d+)(.)$/', $memory_limit, $matches)) {
@@ -157,12 +157,12 @@ function fly_backup_get_php_memory_limit() {
     return (int) $memory_limit;
 }
 
-function fly_backup_get_max_execution_time() {
+function flybackup_get_max_execution_time() {
     return (int) ini_get('max_execution_time');
 }
 
-function fly_backup_send_notification($subject, $message) {
-    $settings = fly_backup_get_settings();
+function flybackup_send_notification($subject, $message) {
+    $settings = flybackup_get_settings();
     
     if (!$settings['email_notifications']) {
         return false;
@@ -174,8 +174,8 @@ function fly_backup_send_notification($subject, $message) {
     return wp_mail($to, $subject, $message, $headers);
 }
 
-function fly_backup_get_excluded_paths() {
-    return apply_filters('fly_backup_excluded_paths', array(
+function flybackup_get_excluded_paths() {
+    return apply_filters('flybackup_excluded_paths', array(
         'cache',
         'tmp',
         'temp',
@@ -187,8 +187,8 @@ function fly_backup_get_excluded_paths() {
     ));
 }
 
-function fly_backup_should_exclude_file($file_path) {
-    $excluded_paths = fly_backup_get_excluded_paths();
+function flybackup_should_exclude_file($file_path) {
+    $excluded_paths = flybackup_get_excluded_paths();
     
     foreach ($excluded_paths as $excluded) {
         if (strpos($file_path, '/' . $excluded . '/') !== false || 
@@ -200,7 +200,7 @@ function fly_backup_should_exclude_file($file_path) {
     return false;
 }
 
-function fly_backup_time_ago($datetime) {
+function flybackup_time_ago($datetime) {
     $timestamp = strtotime($datetime);
     $diff = time() - $timestamp;
     
@@ -217,7 +217,7 @@ function fly_backup_time_ago($datetime) {
     }
 }
 
-function fly_backup_format_next_run($datetime) {
+function flybackup_format_next_run($datetime) {
     if (empty($datetime)) {
         return 'Not scheduled';
     }
@@ -246,10 +246,10 @@ function fly_backup_format_next_run($datetime) {
     }
 }
 
-function fly_backup_verify_nonce($nonce, $action = 'fly_backup_nonce') {
+function flybackup_verify_nonce($nonce, $action = 'flybackup_nonce') {
     return wp_verify_nonce($nonce, $action);
 }
 
-function fly_backup_current_user_can() {
+function flybackup_current_user_can() {
     return current_user_can('manage_options');
 }

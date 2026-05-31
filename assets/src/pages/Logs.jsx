@@ -53,10 +53,10 @@ const Logs = () => {
         try {
             // Use AJAX instead of REST API
             const formData = new FormData();
-            formData.append('action', 'ab_clear_logs');
-            formData.append('nonce', window.autoBackupData.nonce);
+            formData.append('action', 'flybackup_clear_logs');
+            formData.append('nonce', window.flybackupData.nonce);
             
-            const response = await fetch(window.autoBackupData.ajaxUrl, {
+            const response = await fetch(window.flybackupData.ajaxUrl, {
                 method: 'POST',
                 body: formData
             });

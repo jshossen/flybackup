@@ -87,7 +87,7 @@ class Fly_Backup_Database {
         dbDelta($sql_cloud);
         dbDelta($sql_schedules);
         
-        update_option('fly_backup_db_version', self::DB_VERSION);
+        update_option('flybackup_db_version', self::DB_VERSION);
     }
     
     public function get_backups($args = array()) {

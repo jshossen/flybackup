@@ -21,8 +21,8 @@ class Fly_Backup_Scheduler {
         $this->logger = new Fly_Backup_Logger();
         
         if (!self::$hooks_registered) {
-            add_action('fly_backup_scheduled_backup', array($this, 'execute_scheduled_backup'));
-            add_action('fly_backup_cleanup_old_backups', array($this, 'cleanup_old_backups'));
+            add_action('flybackup_scheduled_backup', array($this, 'execute_scheduled_backup'));
+            add_action('flybackup_cleanup_old_backups', array($this, 'cleanup_old_backups'));
             self::$hooks_registered = true;
         }
     }
@@ -120,7 +120,7 @@ class Fly_Backup_Scheduler {
             return;
         }
         
-        $lock_key = 'ab_sched_lock_' . $schedule_id;
+        $lock_key = 'flybackup_sched_lock_' . $schedule_id;
         if (get_transient($lock_key)) {
             $this->logger->warning('Scheduled backup skipped: already running', $schedule_id);
             return;
@@ -179,7 +179,7 @@ class Fly_Backup_Scheduler {
     }
     
     private function schedule_cron($schedule_id, $frequency, $next_run) {
-        $hook = 'fly_backup_scheduled_backup';
+        $hook = 'flybackup_scheduled_backup';
         $timestamp = strtotime($next_run);
         
         if (!wp_next_scheduled($hook, array($schedule_id))) {
@@ -193,7 +193,7 @@ class Fly_Backup_Scheduler {
     }
     
     private function unschedule_cron($schedule_id) {
-        $hook = 'fly_backup_scheduled_backup';
+        $hook = 'flybackup_scheduled_backup';
         $timestamp = wp_next_scheduled($hook, array($schedule_id));
         
         if ($timestamp) {

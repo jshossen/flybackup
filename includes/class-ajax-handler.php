@@ -12,17 +12,17 @@ if (!defined('ABSPATH')) {
 class Fly_Backup_Ajax_Handler {
     
     public function __construct() {
-        add_action('wp_ajax_ab_start_backup', array($this, 'start_backup'));
-        add_action('wp_ajax_ab_get_backup_progress', array($this, 'get_backup_progress'));
-        add_action('wp_ajax_ab_restore_backup', array($this, 'restore_backup'));
-        add_action('wp_ajax_ab_delete_backup', array($this, 'delete_backup'));
-        add_action('wp_ajax_ab_get_health_status', array($this, 'get_health_status'));
-        add_action('wp_ajax_ab_download_backup', array($this, 'download_backup'));
-        add_action('wp_ajax_ab_clear_logs', array($this, 'clear_logs'));
+        add_action('wp_ajax_flybackup_start_backup', array($this, 'start_backup'));
+        add_action('wp_ajax_flybackup_get_backup_progress', array($this, 'get_backup_progress'));
+        add_action('wp_ajax_flybackup_restore_backup', array($this, 'restore_backup'));
+        add_action('wp_ajax_flybackup_delete_backup', array($this, 'delete_backup'));
+        add_action('wp_ajax_flybackup_get_health_status', array($this, 'get_health_status'));
+        add_action('wp_ajax_flybackup_download_backup', array($this, 'download_backup'));
+        add_action('wp_ajax_flybackup_clear_logs', array($this, 'clear_logs'));
     }
     
     public function start_backup() {
-        check_ajax_referer('fly_backup_nonce', 'nonce');
+        check_ajax_referer('flybackup_nonce', 'nonce');
         
         if (!current_user_can('manage_options')) {
             wp_send_json_error(array('message' => 'Unauthorized'));
@@ -42,7 +42,7 @@ class Fly_Backup_Ajax_Handler {
     }
     
     public function get_backup_progress() {
-        check_ajax_referer('fly_backup_nonce', 'nonce');
+        check_ajax_referer('flybackup_nonce', 'nonce');
         
         if (!current_user_can('manage_options')) {
             wp_send_json_error(array('message' => 'Unauthorized'));
@@ -61,7 +61,7 @@ class Fly_Backup_Ajax_Handler {
     }
     
     public function restore_backup() {
-        check_ajax_referer('fly_backup_nonce', 'nonce');
+        check_ajax_referer('flybackup_nonce', 'nonce');
         
         if (!current_user_can('manage_options')) {
             wp_send_json_error(array('message' => 'Unauthorized'));
@@ -86,7 +86,7 @@ class Fly_Backup_Ajax_Handler {
     }
     
     public function delete_backup() {
-        check_ajax_referer('fly_backup_nonce', 'nonce');
+        check_ajax_referer('flybackup_nonce', 'nonce');
         
         if (!current_user_can('manage_options')) {
             wp_send_json_error(array('message' => 'Unauthorized'));
@@ -109,7 +109,7 @@ class Fly_Backup_Ajax_Handler {
     }
     
     public function get_health_status() {
-        check_ajax_referer('fly_backup_nonce', 'nonce');
+        check_ajax_referer('flybackup_nonce', 'nonce');
         
         if (!current_user_can('manage_options')) {
             wp_send_json_error(array('message' => 'Unauthorized'));
@@ -122,7 +122,7 @@ class Fly_Backup_Ajax_Handler {
     }
     
     public function download_backup() {
-        check_ajax_referer('fly_backup_nonce', 'nonce');
+        check_ajax_referer('flybackup_nonce', 'nonce');
         
         if (!current_user_can('manage_options')) {
             wp_die('Unauthorized');
@@ -139,7 +139,7 @@ class Fly_Backup_Ajax_Handler {
     }
     
     public function clear_logs() {
-        check_ajax_referer('fly_backup_nonce', 'nonce');
+        check_ajax_referer('flybackup_nonce', 'nonce');
         
         if (!current_user_can('manage_options')) {
             wp_send_json_error(array('message' => 'Unauthorized'));

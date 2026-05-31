@@ -37,41 +37,41 @@ final class Fly_Backup {
     }
     
     private function load_dependencies() {
-        require_once FLY_BACKUP_PLUGIN_DIR . 'includes/class-database.php';
-        require_once FLY_BACKUP_PLUGIN_DIR . 'includes/class-logger.php';
-        require_once FLY_BACKUP_PLUGIN_DIR . 'includes/class-zip-manager.php';
-        require_once FLY_BACKUP_PLUGIN_DIR . 'includes/class-backup-engine.php';
-        require_once FLY_BACKUP_PLUGIN_DIR . 'includes/class-restore-engine.php';
-        require_once FLY_BACKUP_PLUGIN_DIR . 'includes/class-scheduler.php';
-        require_once FLY_BACKUP_PLUGIN_DIR . 'includes/class-retention-manager.php';
-        require_once FLY_BACKUP_PLUGIN_DIR . 'includes/class-health-check.php';
-        require_once FLY_BACKUP_PLUGIN_DIR . 'includes/class-ajax-handler.php';
-        require_once FLY_BACKUP_PLUGIN_DIR . 'includes/class-rest-api.php';
-        require_once FLY_BACKUP_PLUGIN_DIR . 'includes/class-backup-comparison.php';
-        require_once FLY_BACKUP_PLUGIN_DIR . 'includes/helpers.php';
+        require_once FLYBACKUP_PLUGIN_DIR . 'includes/class-database.php';
+        require_once FLYBACKUP_PLUGIN_DIR . 'includes/class-logger.php';
+        require_once FLYBACKUP_PLUGIN_DIR . 'includes/class-zip-manager.php';
+        require_once FLYBACKUP_PLUGIN_DIR . 'includes/class-backup-engine.php';
+        require_once FLYBACKUP_PLUGIN_DIR . 'includes/class-restore-engine.php';
+        require_once FLYBACKUP_PLUGIN_DIR . 'includes/class-scheduler.php';
+        require_once FLYBACKUP_PLUGIN_DIR . 'includes/class-retention-manager.php';
+        require_once FLYBACKUP_PLUGIN_DIR . 'includes/class-health-check.php';
+        require_once FLYBACKUP_PLUGIN_DIR . 'includes/class-ajax-handler.php';
+        require_once FLYBACKUP_PLUGIN_DIR . 'includes/class-rest-api.php';
+        require_once FLYBACKUP_PLUGIN_DIR . 'includes/class-backup-comparison.php';
+        require_once FLYBACKUP_PLUGIN_DIR . 'includes/helpers.php';
         
-        require_once FLY_BACKUP_PLUGIN_DIR . 'admin/class-admin-menu.php';
-        require_once FLY_BACKUP_PLUGIN_DIR . 'admin/class-dashboard-widget.php';
+        require_once FLYBACKUP_PLUGIN_DIR . 'admin/class-admin-menu.php';
+        require_once FLYBACKUP_PLUGIN_DIR . 'admin/class-dashboard-widget.php';
         
         // Load cloud storage classes
-        if (file_exists(FLY_BACKUP_PLUGIN_DIR . 'includes/cloud/class-cloud-base.php')) {
-            require_once FLY_BACKUP_PLUGIN_DIR . 'includes/cloud/class-cloud-base.php';
+        if (file_exists(FLYBACKUP_PLUGIN_DIR . 'includes/cloud/class-cloud-base.php')) {
+            require_once FLYBACKUP_PLUGIN_DIR . 'includes/cloud/class-cloud-base.php';
         }
-        if (file_exists(FLY_BACKUP_PLUGIN_DIR . 'includes/cloud/class-cloud-manager.php')) {
-            require_once FLY_BACKUP_PLUGIN_DIR . 'includes/cloud/class-cloud-manager.php';
+        if (file_exists(FLYBACKUP_PLUGIN_DIR . 'includes/cloud/class-cloud-manager.php')) {
+            require_once FLYBACKUP_PLUGIN_DIR . 'includes/cloud/class-cloud-manager.php';
         }
-        if (file_exists(FLY_BACKUP_PLUGIN_DIR . 'includes/cloud/class-google-drive.php')) {
-            require_once FLY_BACKUP_PLUGIN_DIR . 'includes/cloud/class-google-drive.php';
+        if (file_exists(FLYBACKUP_PLUGIN_DIR . 'includes/cloud/class-google-drive.php')) {
+            require_once FLYBACKUP_PLUGIN_DIR . 'includes/cloud/class-google-drive.php';
         }
-        if (file_exists(FLY_BACKUP_PLUGIN_DIR . 'includes/cloud/class-dropbox.php')) {
-            require_once FLY_BACKUP_PLUGIN_DIR . 'includes/cloud/class-dropbox.php';
+        if (file_exists(FLYBACKUP_PLUGIN_DIR . 'includes/cloud/class-dropbox.php')) {
+            require_once FLYBACKUP_PLUGIN_DIR . 'includes/cloud/class-dropbox.php';
         }
-        if (file_exists(FLY_BACKUP_PLUGIN_DIR . 'includes/cloud/class-amazon-s3.php')) {
-            require_once FLY_BACKUP_PLUGIN_DIR . 'includes/cloud/class-amazon-s3.php';
+        if (file_exists(FLYBACKUP_PLUGIN_DIR . 'includes/cloud/class-amazon-s3.php')) {
+            require_once FLYBACKUP_PLUGIN_DIR . 'includes/cloud/class-amazon-s3.php';
         }
         
-        if (file_exists(FLY_BACKUP_PLUGIN_DIR . 'pro/class-pro-manager.php')) {
-            require_once FLY_BACKUP_PLUGIN_DIR . 'pro/class-pro-manager.php';
+        if (file_exists(FLYBACKUP_PLUGIN_DIR . 'pro/class-pro-manager.php')) {
+            require_once FLYBACKUP_PLUGIN_DIR . 'pro/class-pro-manager.php';
         }
     }
     
@@ -103,22 +103,22 @@ final class Fly_Backup {
     }
     
     public function load_textdomain() {
-        load_plugin_textdomain('flybackup', false, dirname(FLY_BACKUP_PLUGIN_BASENAME) . '/languages');
+        load_plugin_textdomain('flybackup', false, dirname(FLYBACKUP_PLUGIN_BASENAME) . '/languages');
     }
     
     public static function activate() {
-        require_once FLY_BACKUP_PLUGIN_DIR . 'includes/class-database.php';
+        require_once FLYBACKUP_PLUGIN_DIR . 'includes/class-database.php';
         Fly_Backup_Database::create_tables();
         
-        if (!file_exists(FLY_BACKUP_BACKUP_DIR)) {
-            wp_mkdir_p(FLY_BACKUP_BACKUP_DIR);
-            file_put_contents(FLY_BACKUP_BACKUP_DIR . '.htaccess', 'deny from all');
-            file_put_contents(FLY_BACKUP_BACKUP_DIR . 'index.php', '<?php // Silence is golden');
+        if (!file_exists(FLYBACKUP_BACKUP_DIR)) {
+            wp_mkdir_p(FLYBACKUP_BACKUP_DIR);
+            file_put_contents(FLYBACKUP_BACKUP_DIR . '.htaccess', 'deny from all');
+            file_put_contents(FLYBACKUP_BACKUP_DIR . 'index.php', '<?php // Silence is golden');
         }
         
-        add_option('fly_backup_version', FLY_BACKUP_VERSION);
-        add_option('fly_backup_retention_count', 5);
-        add_option('fly_backup_settings', array(
+        add_option('flybackup_version', FLYBACKUP_VERSION);
+        add_option('flybackup_retention_count', 5);
+        add_option('flybackup_settings', array(
             'email_notifications' => false,
             'notification_email' => get_option('admin_email'),
             'backup_items' => array(
@@ -130,23 +130,23 @@ final class Fly_Backup {
             )
         ));
         
-        if (!wp_next_scheduled('fly_backup_cleanup_old_backups')) {
-            wp_schedule_event(time(), 'daily', 'fly_backup_cleanup_old_backups');
+        if (!wp_next_scheduled('flybackup_cleanup_old_backups')) {
+            wp_schedule_event(time(), 'daily', 'flybackup_cleanup_old_backups');
         }
         
         flush_rewrite_rules();
     }
     
     public static function deactivate() {
-        wp_clear_scheduled_hook('fly_backup_cleanup_old_backups');
+        wp_clear_scheduled_hook('flybackup_cleanup_old_backups');
         
         $schedules = get_posts(array(
-            'post_type' => 'fly_backup_schedule',
+            'post_type' => 'flybackup_schedule',
             'posts_per_page' => -1
         ));
         
         foreach ($schedules as $schedule) {
-            wp_clear_scheduled_hook('fly_backup_scheduled_backup_' . $schedule->ID);
+            wp_clear_scheduled_hook('flybackup_scheduled_backup_' . $schedule->ID);
         }
         
         flush_rewrite_rules();

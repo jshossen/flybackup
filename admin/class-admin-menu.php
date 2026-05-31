@@ -124,24 +124,24 @@ class Fly_Backup_Admin_Menu {
         
         wp_enqueue_style(
             'flybackup-admin',
-            FLY_BACKUP_PLUGIN_URL . 'assets/css/admin-style.css',
+            FLYBACKUP_PLUGIN_URL . 'assets/css/admin-style.css',
             array(),
-            FLY_BACKUP_VERSION
+            FLYBACKUP_VERSION
         );
         
         wp_enqueue_script(
             'flybackup-admin',
-            FLY_BACKUP_PLUGIN_URL . 'assets/js/admin-script.js',
+            FLYBACKUP_PLUGIN_URL . 'assets/js/admin-script.js',
             array('wp-api-fetch', 'wp-i18n'),
-            FLY_BACKUP_VERSION,
+            FLYBACKUP_VERSION,
             true
         );
         
-        wp_localize_script('flybackup-admin', 'autoBackupData', array(
+        wp_localize_script('flybackup-admin', 'flybackupData', array(
             'apiUrl' => rest_url('flybackup/v1'),
-            'nonce' => wp_create_nonce('fly_backup_nonce'),
+            'nonce' => wp_create_nonce('flybackup_nonce'),
             'ajaxUrl' => admin_url('admin-ajax.php'),
-            'pluginUrl' => FLY_BACKUP_PLUGIN_URL,
+            'pluginUrl' => FLYBACKUP_PLUGIN_URL,
             'currentPage' => isset($_GET['page']) ? sanitize_text_field($_GET['page']) : 'flybackup',
             'strings' => array(
                 'confirmDelete' => __('Are you sure you want to delete this backup?', 'flybackup'),

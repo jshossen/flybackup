@@ -25,7 +25,7 @@ class Fly_Backup_Backup_Engine {
     public function create_backup($type = 'full', $items = array(), $is_scheduled = false) {
         try {
             $backup_data = array(
-                'backup_name' => fly_backup_generate_backup_filename($type),
+                'backup_name' => flybackup_generate_backup_filename($type),
                 'backup_type' => $type,
                 'status' => 'in_progress',
                 'included_items' => $items
@@ -35,11 +35,11 @@ class Fly_Backup_Backup_Engine {
             
             $this->logger->info('Backup started', $backup_id, array('type' => $type));
             
-            do_action('fly_backup_before_backup', $backup_id, $type, $items);
+            do_action('flybackup_before_backup', $backup_id, $type, $items);
             
             $start_time = time();
             
-            $backup_path = fly_backup_get_backup_dir() . $backup_data['backup_name'];
+            $backup_path = flybackup_get_backup_dir() . $backup_data['backup_name'];
             $this->zip_manager = new Fly_Backup_Zip_Manager();
             $this->zip_manager->create($backup_path);
             
@@ -122,7 +122,7 @@ class Fly_Backup_Backup_Engine {
                 'size' => $backup_size
             ));
             
-            do_action('fly_backup_after_backup', $backup_id, $backup_path);
+            do_action('flybackup_after_backup', $backup_id, $backup_path);
             
             // Upload to cloud if configured
             $this->upload_to_cloud($backup_id, $backup_path);
@@ -266,7 +266,7 @@ class Fly_Backup_Backup_Engine {
             return $stats;
         }
 
-        $exclude_patterns = fly_backup_get_excluded_paths();
+        $exclude_patterns = flybackup_get_excluded_paths();
         $iterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($source_path, RecursiveDirectoryIterator::SKIP_DOTS),
             RecursiveIteratorIterator::SELF_FIRST
@@ -275,7 +275,7 @@ class Fly_Backup_Backup_Engine {
         foreach ($iterator as $file) {
             $file_path = $file->getRealPath();
 
-            if (fly_backup_should_exclude_file($file_path)) {
+            if (flybackup_should_exclude_file($file_path)) {
                 continue;
             }
 
@@ -323,7 +323,7 @@ class Fly_Backup_Backup_Engine {
         $this->backup_metadata['files']['summary']['total_files'] += (int) $stats['file_count'];
         $this->backup_metadata['files']['summary']['total_size_bytes'] += (int) $stats['size_bytes'];
         
-        $exclude_patterns = fly_backup_get_excluded_paths();
+        $exclude_patterns = flybackup_get_excluded_paths();
         
         $result = $this->zip_manager->add_directory_chunked(
             $source_path,
@@ -386,7 +386,7 @@ class Fly_Backup_Backup_Engine {
             );
         }
         
-        return apply_filters('fly_backup_backup_items', $backup_items, $type, $items);
+        return apply_filters('flybackup_backup_items', $backup_items, $type, $items);
     }
     
     public function get_backup_progress($backup_id) {
@@ -417,20 +417,20 @@ class Fly_Backup_Backup_Engine {
         $total_size = 0;
         
         if (in_array('database', $items)) {
-            $total_size += fly_backup_get_database_size();
+            $total_size += flybackup_get_database_size();
         }
         
         if (in_array('uploads', $items)) {
             $upload_dir = wp_upload_dir();
-            $total_size += fly_backup_get_directory_size($upload_dir['basedir']);
+            $total_size += flybackup_get_directory_size($upload_dir['basedir']);
         }
         
         if (in_array('plugins', $items)) {
-            $total_size += fly_backup_get_directory_size(WP_PLUGIN_DIR);
+            $total_size += flybackup_get_directory_size(WP_PLUGIN_DIR);
         }
         
         if (in_array('themes', $items)) {
-            $total_size += fly_backup_get_directory_size(get_theme_root());
+            $total_size += flybackup_get_directory_size(get_theme_root());
         }
         
         if (in_array('wp_config', $items)) {
@@ -444,7 +444,7 @@ class Fly_Backup_Backup_Engine {
     }
     
     private function cleanup_old_backups() {
-        $retention_count = get_option('fly_backup_retention_count', 5);
+        $retention_count = get_option('flybackup_retention_count', 5);
         $backups = $this->database->get_backups(array(
             'limit' => 1000,
             'status' => 'completed'
@@ -465,7 +465,7 @@ class Fly_Backup_Backup_Engine {
     }
     
     private function send_notification($backup_id, $status, $error_message = '') {
-        $settings = fly_backup_get_settings();
+        $settings = flybackup_get_settings();
         
         if (!$settings['email_notifications']) {
             return;
@@ -477,7 +477,7 @@ class Fly_Backup_Backup_Engine {
             $message = sprintf(
                 "Your WordPress backup has been completed successfully.\n\nBackup Name: %s\nSize: %s\nDuration: %d seconds\nDate: %s",
                 $backup->backup_name,
-                fly_backup_format_bytes($backup->backup_size),
+                flybackup_format_bytes($backup->backup_size),
                 $backup->duration,
                 $backup->created_at
             );
@@ -490,7 +490,7 @@ class Fly_Backup_Backup_Engine {
             );
         }
         
-        fly_backup_send_notification($subject, $message);
+        flybackup_send_notification($subject, $message);
     }
     
     public function delete_backup($backup_id) {

@@ -50,7 +50,7 @@ class Fly_Backup_Restore_Engine {
             }
 
             $this->logger->info('Restore started', $backup_id);
-            do_action('fly_backup_before_restore', $backup_id);
+            do_action('flybackup_before_restore', $backup_id);
 
             // 1. Validate backup archive integrity.
             if (!$this->validate_backup($backup->storage_location)) {
@@ -60,7 +60,7 @@ class Fly_Backup_Restore_Engine {
             // 2. Extract ZIP to temp directory.
             $this->zip_manager = new Fly_Backup_Zip_Manager();
             $this->zip_manager->open($backup->storage_location);
-            $this->temp_dir = FLY_BACKUP_BACKUP_DIR . 'temp_restore_' . gmdate('Y-m-d_H-i-s') . '_' . wp_rand(1000, 9999) . '/';
+            $this->temp_dir = FLYBACKUP_BACKUP_DIR . 'temp_restore_' . gmdate('Y-m-d_H-i-s') . '_' . wp_rand(1000, 9999) . '/';
             wp_mkdir_p($this->temp_dir);
             $this->zip_manager->extract($this->temp_dir);
             $this->zip_manager->close();
@@ -103,7 +103,7 @@ class Fly_Backup_Restore_Engine {
             $this->cleanup_temp_files($this->temp_dir);
 
             $this->logger->success('Restore completed successfully', $backup_id);
-            do_action('fly_backup_after_restore', $backup_id);
+            do_action('flybackup_after_restore', $backup_id);
 
             return array(
                 'success' => true,
@@ -311,7 +311,7 @@ class Fly_Backup_Restore_Engine {
      * Create a component-level snapshot of DB and/or files before restoring.
      */
     private function create_snapshot($items, $backup_type) {
-        $this->snapshot_dir = FLY_BACKUP_BACKUP_DIR . 'restore_snapshot_' . gmdate('Y-m-d_H-i-s') . '_' . wp_rand(1000, 9999) . '/';
+        $this->snapshot_dir = FLYBACKUP_BACKUP_DIR . 'restore_snapshot_' . gmdate('Y-m-d_H-i-s') . '_' . wp_rand(1000, 9999) . '/';
         wp_mkdir_p($this->snapshot_dir);
 
         // Snapshot database.

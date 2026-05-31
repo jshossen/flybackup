@@ -26,10 +26,10 @@ $wpdb->query("DROP TABLE IF EXISTS {$table_backups}");
 $wpdb->query("DROP TABLE IF EXISTS {$table_logs}");
 $wpdb->query("DROP TABLE IF EXISTS {$table_schedules}");
 
-delete_option('fly_backup_settings');
-delete_option('fly_backup_version');
-delete_option('fly_backup_retention_count');
-delete_option('fly_backup_db_version');
+delete_option('flybackup_settings');
+delete_option('flybackup_version');
+delete_option('flybackup_retention_count');
+delete_option('flybackup_db_version');
 
 $upload_dir = wp_upload_dir();
 $backup_dir = $upload_dir['basedir'] . '/flybackup/';
@@ -44,5 +44,5 @@ if (is_dir($backup_dir)) {
     wp_rmdir($backup_dir);
 }
 
-wp_clear_scheduled_hook('fly_backup_scheduled_backup');
-wp_clear_scheduled_hook('fly_backup_cleanup_old_backups');
+wp_clear_scheduled_hook('flybackup_scheduled_backup');
+wp_clear_scheduled_hook('flybackup_cleanup_old_backups');

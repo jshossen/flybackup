@@ -215,8 +215,8 @@ class Fly_Backup_Rest_API {
         
         foreach ($backups as &$backup) {
             $backup->included_items = json_decode($backup->included_items, true);
-            $backup->size_formatted = fly_backup_format_bytes($backup->backup_size);
-            $backup->time_ago = fly_backup_time_ago($backup->created_at);
+            $backup->size_formatted = flybackup_format_bytes($backup->backup_size);
+            $backup->time_ago = flybackup_time_ago($backup->created_at);
             $backup->cloud_storage = $backup->cloud_storage ? json_decode($backup->cloud_storage, true) : null;
         }
         
@@ -235,8 +235,8 @@ class Fly_Backup_Rest_API {
         }
         
         $backup->included_items = json_decode($backup->included_items, true);
-        $backup->size_formatted = fly_backup_format_bytes($backup->backup_size);
-        $backup->time_ago = fly_backup_time_ago($backup->created_at);
+        $backup->size_formatted = flybackup_format_bytes($backup->backup_size);
+        $backup->time_ago = flybackup_time_ago($backup->created_at);
         $backup->cloud_storage = $backup->cloud_storage ? json_decode($backup->cloud_storage, true) : null;
         
         return new WP_REST_Response($backup, 200);
@@ -293,7 +293,7 @@ class Fly_Backup_Rest_API {
         
         foreach ($schedules as &$schedule) {
             $schedule->included_items = json_decode($schedule->included_items, true);
-            $schedule->next_run_formatted = fly_backup_format_next_run($schedule->next_run);
+            $schedule->next_run_formatted = flybackup_format_next_run($schedule->next_run);
         }
         
         return new WP_REST_Response($schedules, 200);
@@ -381,8 +381,8 @@ class Fly_Backup_Rest_API {
     }
     
     public function get_settings($request) {
-        $settings = fly_backup_get_settings();
-        $retention_count = get_option('fly_backup_retention_count', 5);
+        $settings = flybackup_get_settings();
+        $retention_count = get_option('flybackup_retention_count', 5);
         
         return new WP_REST_Response(array(
             'settings' => $settings,
@@ -394,11 +394,11 @@ class Fly_Backup_Rest_API {
         $params = $request->get_json_params();
         
         if (isset($params['settings'])) {
-            fly_backup_update_settings($params['settings']);
+            flybackup_update_settings($params['settings']);
         }
         
         if (isset($params['retention_count'])) {
-            update_option('fly_backup_retention_count', intval($params['retention_count']));
+            update_option('flybackup_retention_count', intval($params['retention_count']));
         }
         
         return new WP_REST_Response(array(
@@ -428,13 +428,13 @@ class Fly_Backup_Rest_API {
             'last_backup' => $newest_backup ? array(
                 'name' => $newest_backup->backup_name,
                 'date' => $newest_backup->created_at,
-                'time_ago' => fly_backup_time_ago($newest_backup->created_at),
-                'size' => fly_backup_format_bytes($newest_backup->backup_size)
+                'time_ago' => flybackup_time_ago($newest_backup->created_at),
+                'size' => flybackup_format_bytes($newest_backup->backup_size)
             ) : null,
             'next_scheduled' => $next_scheduled ? array(
                 'name' => $next_scheduled->schedule_name,
                 'date' => $next_scheduled->next_run,
-                'time_until' => fly_backup_format_next_run($next_scheduled->next_run)
+                'time_until' => flybackup_format_next_run($next_scheduled->next_run)
             ) : null
         ), 200);
     }

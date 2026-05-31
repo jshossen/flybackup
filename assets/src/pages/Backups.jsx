@@ -168,7 +168,7 @@ const Backups = () => {
 
     const handleDownload = (backup) => {
         // Use admin-ajax.php for authenticated downloads
-        const downloadUrl = `${window.autoBackupData.ajaxUrl}?action=ab_download_backup&backup_id=${backup.id}&nonce=${window.autoBackupData.nonce}`;
+        const downloadUrl = `${window.flybackupData.ajaxUrl}?action=flybackup_download_backup&backup_id=${backup.id}&nonce=${window.flybackupData.nonce}`;
         window.location.href = downloadUrl;
     };
 
