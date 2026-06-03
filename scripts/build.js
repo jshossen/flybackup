@@ -2,9 +2,9 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-// Read version from flybackup.php
+// Read version from flybackup.php (one directory up from scripts/)
 function getPluginVersion() {
-    const pluginFile = path.join(__dirname, 'flybackup.php');
+    const pluginFile = path.join(__dirname, '..', 'flybackup.php');
     const content = fs.readFileSync(pluginFile, 'utf8');
     const versionMatch = content.match(/\*\s*Version:\s*([0-9.]+)/);
     
@@ -16,11 +16,12 @@ function getPluginVersion() {
     return versionMatch[1];
 }
 
-// Create ZIP file for Pro version
-function createProZip(version) {
-    const pluginName = 'flybackup-pro';
+// Create ZIP file
+function createZip(version) {
+    const pluginName = 'flybackup';
     const zipName = `${pluginName}-${version}.zip`;
-    const currentDir = __dirname;
+    const currentDir = path.join(__dirname, '..');
+    const pluginDir = path.basename(currentDir);
     const buildDir = path.join(currentDir, 'build');
     const zipPath = path.join(buildDir, zipName);
     
@@ -36,16 +37,15 @@ function createProZip(version) {
         console.log(`🗑️  Removed old ${zipName}`);
     }
     
-    // Files and directories to include in the Pro ZIP
+    // Files and directories to include in the ZIP
     const includeFiles = [
         'flybackup.php',
         'uninstall.php',
         'readme.txt',
-        'README.md',
         'composer.json',
         'includes/',
         'admin/',
-        'pro/',              // Pro features included
+        // 'pro/',
         'assets/js/',
         'assets/css/',
         'assets/images/',
@@ -61,15 +61,14 @@ function createProZip(version) {
         'package.json',
         'package-lock.json',
         'webpack.config.js',
-        'build.js',
-        'build-pro.js',
+        'scripts',
         '.DS_Store',
-        '*.map'
+        '*.map',
+        'README.md'
     ];
     
-    console.log(`📦 Building Pro Version: ${zipName}...`);
+    console.log(`📦 Building ${zipName}...`);
     console.log(`📌 Version: ${version}`);
-    console.log(`⭐ Pro Features: Enabled`);
     
     try {
         // Build the zip command - zip from current directory to build folder
@@ -87,34 +86,29 @@ function createProZip(version) {
         });
         
         // Execute zip command
-        console.log('\n📝 Creating Pro archive...');
+        console.log('\n📝 Creating archive...');
         execSync(zipCommand, { stdio: 'pipe' });
         
         // Verify file was created
         if (!fs.existsSync(zipPath)) {
-            throw new Error('Pro ZIP file was not created');
+            throw new Error('ZIP file was not created');
         }
         
         // Get file size
         const stats = fs.statSync(zipPath);
         const fileSizeInMB = (stats.size / (1024 * 1024)).toFixed(2);
         
-        console.log(`\n✅ Pro Build complete!`);
+        console.log(`\n✅ Build complete!`);
         console.log(`📦 File: ${zipPath}`);
         console.log(`📊 Size: ${fileSizeInMB} MB`);
-        console.log(`\n🚀 Pro version ready for distribution!`);
-        console.log(`\n💡 Pro Features Included:`);
-        console.log(`   - Cloud Storage (Google Drive, Dropbox, S3)`);
-        console.log(`   - Migration Tool`);
-        console.log(`   - Real-time Backup`);
-        console.log(`   - License Management`);
+        console.log(`\n🚀 Ready to upload to WordPress!`);
         
     } catch (error) {
-        console.error('❌ Pro build failed:', error.message);
+        console.error('❌ Build failed:', error.message);
         process.exit(1);
     }
 }
 
 // Main execution
 const version = getPluginVersion();
-createProZip(version);
+createZip(version);

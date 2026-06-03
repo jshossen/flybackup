@@ -79,7 +79,19 @@ Fly Backup is a modern, lightweight WordPress backup plugin designed for beginne
    # Removes compiled JS/CSS files
    ```
 
-6. **Activate Plugin**
+6. **Release to WordPress.org**
+   ```bash
+   npm run release
+   # Full build + SVN deploy
+
+   npm run release -- --skip-build
+   # Reuse existing build artifacts
+
+   npm run release -- --skip-deploy
+   # Build only, no SVN deploy
+   ```
+
+7. **Activate Plugin**
    - Go to WordPress admin → Plugins
    - Activate "Fly Backup"
 
@@ -172,17 +184,17 @@ flybackup/
 ## Hooks & Filters
 
 ### Actions
-- `fly_backup_before_backup` - Fires before backup starts
-- `fly_backup_after_backup` - Fires after backup completes
-- `fly_backup_before_restore` - Fires before restore starts
-- `fly_backup_after_restore` - Fires after restore completes
+- `flybackup_before_backup` - Fires before backup starts
+- `flybackup_after_backup` - Fires after backup completes
+- `flybackup_before_restore` - Fires before restore starts
+- `flybackup_after_restore` - Fires after restore completes
 
 ### Filters
-- `fly_backup_storage_locations` - Modify storage locations
-- `fly_backup_backup_items` - Modify backup items
-- `fly_backup_retention_policy` - Modify retention count
-- `fly_backup_health_checks` - Add custom health checks
-- `fly_backup_excluded_paths` - Modify excluded file paths
+- `flybackup_storage_locations` - Modify storage locations
+- `flybackup_backup_items` - Modify backup items
+- `flybackup_retention_policy` - Modify retention count
+- `flybackup_health_checks` - Add custom health checks
+- `flybackup_excluded_paths` - Modify excluded file paths
 
 ## Troubleshooting
 

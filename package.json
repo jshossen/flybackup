@@ -7,9 +7,10 @@
     "start": "webpack --mode development --watch",
     "dev": "webpack --mode development",
     "build:assets": "webpack --mode production",
-    "build": "npm run build:assets && node build.js",
-    "build:pro": "npm run build:assets && node build-pro.js",
-    "clean": "rm -rf assets/js/admin-script.js* assets/css/admin-style.css*"
+    "build": "npm run build:assets && node scripts/build.js",
+    "build:pro": "npm run build:assets && node scripts/build-pro.js",
+    "clean": "rm -rf assets/js/admin-script.js* assets/css/admin-style.css*",
+    "release": "bash scripts/release.sh"
   },
   "keywords": [
     "wordpress",
