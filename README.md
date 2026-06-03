@@ -1,4 +1,4 @@
-# Auto Backup - WordPress Plugin
+# Fly Backup - WordPress Plugin
 
 **Version:** 1.0.0  
 **Author:** Your Name  
@@ -6,7 +6,7 @@
 
 ## Description
 
-Auto Backup is a modern, lightweight WordPress backup plugin designed for beginners and professionals alike. Create automated backups of your entire WordPress site with just one click.
+Fly Backup is a modern, lightweight WordPress backup plugin designed for beginners and professionals alike. Create automated backups of your entire WordPress site with just one click.
 
 ## Features
 
@@ -31,9 +31,9 @@ Auto Backup is a modern, lightweight WordPress backup plugin designed for beginn
 
 ## Installation
 
-1. Upload the `auto-backup` folder to `/wp-content/plugins/`
+1. Upload the `flybackup` folder to `/wp-content/plugins/`
 2. Activate the plugin through the 'Plugins' menu in WordPress
-3. Navigate to **Auto Backup** in your WordPress admin menu
+3. Navigate to **Fly Backup** in your WordPress admin menu
 4. Configure your backup settings and create your first backup
 
 ## Development Setup
@@ -62,8 +62,8 @@ Auto Backup is a modern, lightweight WordPress backup plugin designed for beginn
    npm run build
    # This will:
    # - Build optimized React assets
-   # - Read version from auto-backup.php
-   # - Create build/auto-backup-{version}.zip
+   # - Read version from flybackup.php
+   # - Create build/flybackup-{version}.zip
    # - Ready to upload to WordPress!
    ```
 
@@ -79,9 +79,21 @@ Auto Backup is a modern, lightweight WordPress backup plugin designed for beginn
    # Removes compiled JS/CSS files
    ```
 
-6. **Activate Plugin**
+6. **Release to WordPress.org**
+   ```bash
+   npm run release
+   # Full build + SVN deploy
+
+   npm run release -- --skip-build
+   # Reuse existing build artifacts
+
+   npm run release -- --skip-deploy
+   # Build only, no SVN deploy
+   ```
+
+7. **Activate Plugin**
    - Go to WordPress admin → Plugins
-   - Activate "Auto Backup"
+   - Activate "Fly Backup"
 
 ## Architecture
 
@@ -98,25 +110,25 @@ Auto Backup is a modern, lightweight WordPress backup plugin designed for beginn
 - **Real-time Updates** - Dynamic UI updates
 
 ### Database Schema
-- `wp_ab_backups` - Stores backup metadata
-- `wp_ab_logs` - Comprehensive logging
-- `wp_ab_schedules` - Scheduled backup configuration
+- `wp_fly_backup_backups` - Stores backup metadata
+- `wp_fly_backup_logs` - Comprehensive logging
+- `wp_fly_backup_schedules` - Scheduled backup configuration
 
 ### REST API Endpoints
-- `GET /wp-json/auto-backup/v1/backups` - List backups
-- `POST /wp-json/auto-backup/v1/backups` - Create backup
-- `DELETE /wp-json/auto-backup/v1/backups/{id}` - Delete backup
-- `POST /wp-json/auto-backup/v1/backups/{id}/restore` - Restore backup
-- `GET /wp-json/auto-backup/v1/schedules` - List schedules
-- `GET /wp-json/auto-backup/v1/health` - Health status
-- `GET /wp-json/auto-backup/v1/logs` - View logs
-- `GET /wp-json/auto-backup/v1/settings` - Get settings
+- `GET /wp-json/flybackup/v1/backups` - List backups
+- `POST /wp-json/flybackup/v1/backups` - Create backup
+- `DELETE /wp-json/flybackup/v1/backups/{id}` - Delete backup
+- `POST /wp-json/flybackup/v1/backups/{id}/restore` - Restore backup
+- `GET /wp-json/flybackup/v1/schedules` - List schedules
+- `GET /wp-json/flybackup/v1/health` - Health status
+- `GET /wp-json/flybackup/v1/logs` - View logs
+- `GET /wp-json/flybackup/v1/settings` - Get settings
 
 ## File Structure
 
 ```
-auto-backup/
-├── auto-backup.php          # Main plugin file
+flybackup/
+├── flybackup.php          # Main plugin file
 ├── uninstall.php            # Uninstall cleanup
 ├── readme.txt               # WordPress.org readme
 ├── package.json             # NPM dependencies
@@ -126,7 +138,7 @@ auto-backup/
 │   ├── js/                  # Compiled JavaScript
 │   └── css/                 # Compiled CSS
 ├── includes/                # PHP classes
-│   ├── class-auto-backup.php
+│   ├── class-flybackup.php
 │   ├── class-backup-engine.php
 │   ├── class-restore-engine.php
 │   ├── class-scheduler.php
@@ -146,25 +158,25 @@ auto-backup/
 ## Usage
 
 ### Creating a Backup
-1. Go to **Auto Backup → Backups**
+1. Go to **Fly Backup → Backups**
 2. Click "Create Backup"
 3. Select backup type (Full, Partial, or Database)
 4. Wait for completion
 
 ### Restoring a Backup
-1. Go to **Auto Backup → Restore**
+1. Go to **Fly Backup → Restore**
 2. Select a backup from the list
 3. Click "Restore"
 4. Confirm the action
 
 ### Scheduling Backups
-1. Go to **Auto Backup → Schedules**
+1. Go to **Fly Backup → Schedules**
 2. Click "Create Schedule"
 3. Configure frequency and backup type
 4. Save schedule
 
 ### Configuring Settings
-1. Go to **Auto Backup → Settings**
+1. Go to **Fly Backup → Settings**
 2. Enable email notifications (optional)
 3. Set retention count
 4. Save settings
@@ -172,23 +184,23 @@ auto-backup/
 ## Hooks & Filters
 
 ### Actions
-- `auto_backup_before_backup` - Fires before backup starts
-- `auto_backup_after_backup` - Fires after backup completes
-- `auto_backup_before_restore` - Fires before restore starts
-- `auto_backup_after_restore` - Fires after restore completes
+- `flybackup_before_backup` - Fires before backup starts
+- `flybackup_after_backup` - Fires after backup completes
+- `flybackup_before_restore` - Fires before restore starts
+- `flybackup_after_restore` - Fires after restore completes
 
 ### Filters
-- `auto_backup_storage_locations` - Modify storage locations
-- `auto_backup_backup_items` - Modify backup items
-- `auto_backup_retention_policy` - Modify retention count
-- `auto_backup_health_checks` - Add custom health checks
-- `auto_backup_excluded_paths` - Modify excluded file paths
+- `flybackup_storage_locations` - Modify storage locations
+- `flybackup_backup_items` - Modify backup items
+- `flybackup_retention_policy` - Modify retention count
+- `flybackup_health_checks` - Add custom health checks
+- `flybackup_excluded_paths` - Modify excluded file paths
 
 ## Troubleshooting
 
 ### Backup Fails
 - Check disk space
-- Verify write permissions on `/wp-content/auto-backups/`
+- Verify write permissions on `/wp-content/flybackups/`
 - Increase PHP memory limit
 - Check error logs
 

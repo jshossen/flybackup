@@ -1,5 +1,5 @@
 {
-    "name": "auto-backup/wordpress-plugin",
+    "name": "flybackup/wordpress-plugin",
     "description": "Automatic WordPress backups that just work",
     "type": "wordpress-plugin",
     "license": "GPL-2.0-or-later",

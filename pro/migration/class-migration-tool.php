@@ -2,14 +2,14 @@
 /**
  * Migration Tool Class (Skeleton)
  *
- * @package Auto_Backup
+ * @package Fly_Backup
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Auto_Backup_Migration_Tool {
+class Fly_Backup_Migration_Tool {
     
     public function export_site() {
         return false;

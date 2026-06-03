@@ -2,26 +2,26 @@
 /**
  * Retention Manager Class
  *
- * @package Auto_Backup
+ * @package Fly_Backup
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Auto_Backup_Retention_Manager {
+class Fly_Backup_Retention_Manager {
     
     private $database;
     private $logger;
     
     public function __construct() {
-        $this->database = new Auto_Backup_Database();
-        $this->logger = new Auto_Backup_Logger();
+        $this->database = new Fly_Backup_Database();
+        $this->logger = new Fly_Backup_Logger();
     }
     
     public function cleanup() {
-        $retention_count = get_option('auto_backup_retention_count', 5);
-        $retention_count = apply_filters('auto_backup_retention_policy', $retention_count);
+        $retention_count = get_option('flybackup_retention_count', 5);
+        $retention_count = apply_filters('flybackup_retention_policy', $retention_count);
         
         $backups = $this->database->get_backups(array(
             'limit' => 1000,
@@ -45,29 +45,29 @@ class Auto_Backup_Retention_Manager {
     
     private function delete_backup($backup) {
         if (file_exists($backup->storage_location)) {
-            $deleted = @unlink($backup->storage_location);
-            
-            if ($deleted) {
+            wp_delete_file($backup->storage_location);
+
+            if (!file_exists($backup->storage_location)) {
                 $this->logger->info('Deleted backup file: ' . $backup->backup_name);
             } else {
                 $this->logger->warning('Failed to delete backup file: ' . $backup->backup_name);
             }
         }
-        
+
         $this->database->delete_backup($backup->id);
     }
     
     public function get_storage_usage() {
         $total_size = $this->database->get_total_backup_size();
         $backup_count = $this->database->get_backup_count('completed');
-        $available_space = auto_backup_get_available_disk_space();
+        $available_space = flybackup_get_available_disk_space();
         
         return array(
             'total_size' => $total_size,
-            'total_size_formatted' => auto_backup_format_bytes($total_size),
+            'total_size_formatted' => flybackup_format_bytes($total_size),
             'backup_count' => $backup_count,
             'available_space' => $available_space,
-            'available_space_formatted' => auto_backup_format_bytes($available_space)
+            'available_space_formatted' => flybackup_format_bytes($available_space)
         );
     }
     
@@ -94,10 +94,10 @@ class Auto_Backup_Retention_Manager {
     }
     
     public function delete_old_backups_by_age($days) {
-        $cutoff_date = date('Y-m-d H:i:s', strtotime("-{$days} days"));
+        $cutoff_date = gmdate('Y-m-d H:i:s', strtotime("-{$days} days"));
         
         global $wpdb;
-        $table = $wpdb->prefix . 'ab_backups';
+        $table = $wpdb->prefix . 'fly_backup_backups';
         
         $old_backups = $wpdb->get_results($wpdb->prepare(
             "SELECT * FROM {$table} WHERE created_at < %s AND status = 'completed'",

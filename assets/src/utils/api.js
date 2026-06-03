@@ -1,6 +1,6 @@
 import apiFetch from '@wordpress/api-fetch';
 
-const API_NAMESPACE = 'auto-backup/v1';
+const API_NAMESPACE = 'flybackup/v1';
 
 export const getBackups = async (params = {}) => {
     const query = new URLSearchParams(params).toString();
@@ -84,4 +84,62 @@ export const updateSettings = async (data) => {
 
 export const getStats = async () => {
     return await apiFetch({ path: `/${API_NAMESPACE}/stats` });
+};
+
+export const getSystemRequirements = async () => {
+    return await apiFetch({ path: `/${API_NAMESPACE}/system-requirements` });
+};
+
+export const getBackupDetails = async (id) => {
+    return await apiFetch({ path: `/${API_NAMESPACE}/backups/${id}/details` });
+};
+
+export const compareCurrentVsBackup = async (id) => {
+    return await apiFetch({ path: `/${API_NAMESPACE}/backups/${id}/compare/current` });
+};
+
+export const compareBackupVsBackup = async (sourceId, targetId) => {
+    return await apiFetch({
+        path: `/${API_NAMESPACE}/backups/compare`,
+        method: 'POST',
+        data: { source_id: sourceId, target_id: targetId }
+    });
+};
+
+export const getTableDiff = async (backupId, table, sourceBackupId = 0, targetBackupId = null) => {
+    const params = new URLSearchParams();
+    if (sourceBackupId) params.append('source_backup_id', sourceBackupId);
+    if (targetBackupId) params.append('target_backup_id', targetBackupId);
+    
+    return await apiFetch({ 
+        path: `/${API_NAMESPACE}/backups/${backupId}/tables/${table}/diff?${params.toString()}` 
+    });
+};
+
+// Cloud storage API
+export const getCloudStatus = async () => {
+    return await apiFetch({ path: `/${API_NAMESPACE}/cloud/status` });
+};
+
+export const connectCloudProvider = async (provider, credentials, settings = {}) => {
+    return await apiFetch({
+        path: `/${API_NAMESPACE}/cloud/connect`,
+        method: 'POST',
+        data: { provider, credentials, settings }
+    });
+};
+
+export const disconnectCloudProvider = async (provider) => {
+    return await apiFetch({
+        path: `/${API_NAMESPACE}/cloud/disconnect/${provider}`,
+        method: 'DELETE'
+    });
+};
+
+export const uploadBackupToCloud = async (backupId, provider) => {
+    return await apiFetch({
+        path: `/${API_NAMESPACE}/cloud/upload/${backupId}`,
+        method: 'POST',
+        data: { provider }
+    });
 };

@@ -1,0 +1,26 @@
+.flybackup-dashboard-widget {
+    padding: 10px 0;
+}
+.flybackup-stat {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #f0f0f0;
+}
+.flybackup-stat:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+.flybackup-stat-label {
+    font-weight: 600;
+    color: #23282d;
+    margin-bottom: 5px;
+}
+.flybackup-stat-value {
+    color: #72aee6;
+    font-size: 14px;
+}
+.flybackup-actions {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #f0f0f0;
+}

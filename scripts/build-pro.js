@@ -2,14 +2,14 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-// Read version from auto-backup.php
+// Read version from flybackup.php (one directory up from scripts/)
 function getPluginVersion() {
-    const pluginFile = path.join(__dirname, 'auto-backup.php');
+    const pluginFile = path.join(__dirname, '..', 'flybackup.php');
     const content = fs.readFileSync(pluginFile, 'utf8');
     const versionMatch = content.match(/\*\s*Version:\s*([0-9.]+)/);
     
     if (!versionMatch) {
-        console.error('❌ Could not find version in auto-backup.php');
+        console.error('❌ Could not find version in flybackup.php');
         process.exit(1);
     }
     
@@ -18,9 +18,9 @@ function getPluginVersion() {
 
 // Create ZIP file for Pro version
 function createProZip(version) {
-    const pluginName = 'auto-backup-pro';
+    const pluginName = 'flybackup-pro';
     const zipName = `${pluginName}-${version}.zip`;
-    const currentDir = __dirname;
+    const currentDir = path.join(__dirname, '..');
     const buildDir = path.join(currentDir, 'build');
     const zipPath = path.join(buildDir, zipName);
     
@@ -38,7 +38,7 @@ function createProZip(version) {
     
     // Files and directories to include in the Pro ZIP
     const includeFiles = [
-        'auto-backup.php',
+        'flybackup.php',
         'uninstall.php',
         'readme.txt',
         'README.md',
@@ -61,8 +61,7 @@ function createProZip(version) {
         'package.json',
         'package-lock.json',
         'webpack.config.js',
-        'build.js',
-        'build-pro.js',
+        'scripts',
         '.DS_Store',
         '*.map'
     ];

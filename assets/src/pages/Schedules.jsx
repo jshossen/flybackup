@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { getSchedules, deleteSchedule, createSchedule } from '../utils/api';
 import LoadingSpinner from '../components/LoadingSpinner';
+import ConfirmModal from '../components/ConfirmModal';
+import NotificationToast from '../components/NotificationToast';
 
 const Schedules = () => {
     const [schedules, setSchedules] = useState([]);
@@ -12,6 +14,20 @@ const Schedules = () => {
         frequency: 'daily',
         backup_type: 'full',
         time: '00:00'
+    });
+    
+    const [confirmModal, setConfirmModal] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        onConfirm: null,
+        danger: false
+    });
+    
+    const [notification, setNotification] = useState({
+        isOpen: false,
+        type: 'success',
+        message: ''
     });
 
     useEffect(() => {
@@ -34,7 +50,11 @@ const Schedules = () => {
         setCreating(true);
         try {
             await createSchedule(formData);
-            alert('Schedule created successfully!');
+            setNotification({
+                isOpen: true,
+                type: 'success',
+                message: 'Schedule created successfully!'
+            });
             setShowModal(false);
             setFormData({
                 schedule_name: '',
@@ -44,21 +64,41 @@ const Schedules = () => {
             });
             loadSchedules();
         } catch (error) {
-            alert('Failed to create schedule: ' + error.message);
+            setNotification({
+                isOpen: true,
+                type: 'error',
+                message: 'Failed to create schedule: ' + error.message
+            });
         } finally {
             setCreating(false);
         }
     };
 
-    const handleDelete = async (id) => {
-        if (!confirm('Delete this schedule?')) return;
-        
+    const handleDelete = (id) => {
+        setConfirmModal({
+            isOpen: true,
+            title: 'Delete Schedule',
+            message: 'Are you sure you want to delete this schedule? This action cannot be undone.',
+            onConfirm: () => executeDelete(id),
+            danger: true
+        });
+    };
+    
+    const executeDelete = async (id) => {
         try {
             await deleteSchedule(id);
-            alert('Schedule deleted!');
+            setNotification({
+                isOpen: true,
+                type: 'success',
+                message: 'Schedule deleted successfully!'
+            });
             loadSchedules();
         } catch (error) {
-            alert('Failed to delete schedule: ' + error.message);
+            setNotification({
+                isOpen: true,
+                type: 'error',
+                message: 'Failed to delete schedule: ' + error.message
+            });
         }
     };
 
@@ -198,6 +238,22 @@ const Schedules = () => {
                     </div>
                 </div>
             )}
+            
+            <ConfirmModal
+                isOpen={confirmModal.isOpen}
+                title={confirmModal.title}
+                message={confirmModal.message}
+                onConfirm={confirmModal.onConfirm}
+                onCancel={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                danger={confirmModal.danger}
+            />
+            
+            <NotificationToast
+                isOpen={notification.isOpen}
+                type={notification.type}
+                message={notification.message}
+                onClose={() => setNotification(prev => ({ ...prev, isOpen: false }))}
+            />
         </div>
     );
 };

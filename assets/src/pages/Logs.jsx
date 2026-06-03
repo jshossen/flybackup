@@ -1,11 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { getLogs } from '../utils/api';
 import LoadingSpinner from '../components/LoadingSpinner';
+import ConfirmModal from '../components/ConfirmModal';
+import NotificationToast from '../components/NotificationToast';
 
 const Logs = () => {
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [clearing, setClearing] = useState(false);
+    
+    const [confirmModal, setConfirmModal] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        onConfirm: null,
+        danger: false
+    });
+    
+    const [notification, setNotification] = useState({
+        isOpen: false,
+        type: 'success',
+        message: ''
+    });
 
     useEffect(() => {
         loadLogs();
@@ -22,17 +38,25 @@ const Logs = () => {
         }
     };
 
-    const handleClearLogs = async () => {
-        if (!confirm('Are you sure you want to clear all logs? This cannot be undone.')) return;
-        
+    const handleClearLogs = () => {
+        setConfirmModal({
+            isOpen: true,
+            title: 'Clear All Logs',
+            message: 'Are you sure you want to clear all logs? This action cannot be undone.',
+            onConfirm: executeClearLogs,
+            danger: true
+        });
+    };
+    
+    const executeClearLogs = async () => {
         setClearing(true);
         try {
             // Use AJAX instead of REST API
             const formData = new FormData();
-            formData.append('action', 'ab_clear_logs');
-            formData.append('nonce', window.autoBackupData.nonce);
+            formData.append('action', 'flybackup_clear_logs');
+            formData.append('nonce', window.flybackupData.nonce);
             
-            const response = await fetch(window.autoBackupData.ajaxUrl, {
+            const response = await fetch(window.flybackupData.ajaxUrl, {
                 method: 'POST',
                 body: formData
             });
@@ -40,13 +64,25 @@ const Logs = () => {
             const result = await response.json();
             
             if (result.success) {
-                alert('Logs cleared successfully!');
+                setNotification({
+                    isOpen: true,
+                    type: 'success',
+                    message: 'Logs cleared successfully!'
+                });
                 setLogs([]);
             } else {
-                alert('Failed to clear logs: ' + (result.data?.message || 'Unknown error'));
+                setNotification({
+                    isOpen: true,
+                    type: 'error',
+                    message: 'Failed to clear logs: ' + (result.data?.message || 'Unknown error')
+                });
             }
         } catch (error) {
-            alert('Failed to clear logs: ' + error.message);
+            setNotification({
+                isOpen: true,
+                type: 'error',
+                message: 'Failed to clear logs: ' + error.message
+            });
         } finally {
             setClearing(false);
         }
@@ -97,6 +133,22 @@ const Logs = () => {
                     </tbody>
                 </table>
             )}
+            
+            <ConfirmModal
+                isOpen={confirmModal.isOpen}
+                title={confirmModal.title}
+                message={confirmModal.message}
+                onConfirm={confirmModal.onConfirm}
+                onCancel={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                danger={confirmModal.danger}
+            />
+            
+            <NotificationToast
+                isOpen={notification.isOpen}
+                type={notification.type}
+                message={notification.message}
+                onClose={() => setNotification(prev => ({ ...prev, isOpen: false }))}
+            />
         </div>
     );
 };

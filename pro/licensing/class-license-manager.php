@@ -2,14 +2,14 @@
 /**
  * License Manager Class (Skeleton)
  *
- * @package Auto_Backup
+ * @package Fly_Backup
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Auto_Backup_License_Manager {
+class Fly_Backup_License_Manager {
     
     public function validate_license($license_key) {
         return false;

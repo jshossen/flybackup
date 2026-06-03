@@ -2,14 +2,14 @@
 /**
  * Admin Menu Class
  *
- * @package Auto_Backup
+ * @package Fly_Backup
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Auto_Backup_Admin_Menu {
+class Fly_Backup_Admin_Menu {
     
     public function __construct() {
         add_action('admin_menu', array($this, 'register_menu'));
@@ -18,66 +18,93 @@ class Auto_Backup_Admin_Menu {
     
     public function register_menu() {
         add_menu_page(
-            __('Auto Backup', 'auto-backup'),
-            __('Auto Backup', 'auto-backup'),
+            __('Fly Backup', 'flybackup'),
+            __('Fly Backup', 'flybackup'),
             'manage_options',
-            'auto-backup',
+            'flybackup',
             array($this, 'render_page'),
             'dashicons-backup',
             30
         );
         
         add_submenu_page(
-            'auto-backup',
-            __('Dashboard', 'auto-backup'),
-            __('Dashboard', 'auto-backup'),
+            'flybackup',
+            __('Dashboard', 'flybackup'),
+            __('Dashboard', 'flybackup'),
             'manage_options',
-            'auto-backup',
+            'flybackup',
             array($this, 'render_page')
         );
         
         add_submenu_page(
-            'auto-backup',
-            __('Backups', 'auto-backup'),
-            __('Backups', 'auto-backup'),
+            'flybackup',
+            __('Backups', 'flybackup'),
+            __('Backups', 'flybackup'),
             'manage_options',
-            'auto-backup-backups',
+            'flybackup-backups',
             array($this, 'render_page')
         );
         
         add_submenu_page(
-            'auto-backup',
-            __('Restore', 'auto-backup'),
-            __('Restore', 'auto-backup'),
+            'flybackup',
+            __('Restore', 'flybackup'),
+            __('Restore', 'flybackup'),
             'manage_options',
-            'auto-backup-restore',
+            'flybackup-restore',
             array($this, 'render_page')
         );
         
         add_submenu_page(
-            'auto-backup',
-            __('Schedules', 'auto-backup'),
-            __('Schedules', 'auto-backup'),
+            'flybackup',
+            __('Backup Details', 'flybackup'),
+            null,
             'manage_options',
-            'auto-backup-schedules',
+            'flybackup-backup-details',
             array($this, 'render_page')
         );
         
         add_submenu_page(
-            'auto-backup',
-            __('Settings', 'auto-backup'),
-            __('Settings', 'auto-backup'),
+            'flybackup',
+            __('Schedules', 'flybackup'),
+            __('Schedules', 'flybackup'),
             'manage_options',
-            'auto-backup-settings',
+            'flybackup-schedules',
             array($this, 'render_page')
         );
         
         add_submenu_page(
-            'auto-backup',
-            __('Logs', 'auto-backup'),
-            __('Logs', 'auto-backup'),
+            'flybackup',
+            __('Settings', 'flybackup'),
+            __('Settings', 'flybackup'),
             'manage_options',
-            'auto-backup-logs',
+            'flybackup-settings',
+            array($this, 'render_page')
+        );
+        
+        add_submenu_page(
+            'flybackup',
+            __('Compare', 'flybackup'),
+            __('Compare', 'flybackup'),
+            'manage_options',
+            'flybackup-compare',
+            array($this, 'render_page')
+        );
+        
+        add_submenu_page(
+            'flybackup',
+            __('Cloud Storage', 'flybackup'),
+            __('Cloud Storage', 'flybackup'),
+            'manage_options',
+            'flybackup-cloud',
+            array($this, 'render_page')
+        );
+        
+        add_submenu_page(
+            'flybackup',
+            __('Logs', 'flybackup'),
+            __('Logs', 'flybackup'),
+            'manage_options',
+            'flybackup-logs',
             array($this, 'render_page')
         );
     }
@@ -85,42 +112,42 @@ class Auto_Backup_Admin_Menu {
     public function render_page() {
         ?>
         <div class="wrap">
-            <div id="auto-backup-app"></div>
+            <div id="flybackup-app"></div>
         </div>
         <?php
     }
     
     public function enqueue_assets($hook) {
-        if (strpos($hook, 'auto-backup') === false) {
+        if (strpos($hook, 'flybackup') === false) {
             return;
         }
         
         wp_enqueue_style(
-            'auto-backup-admin',
-            AUTO_BACKUP_PLUGIN_URL . 'assets/css/admin-style.css',
+            'flybackup-admin',
+            FLYBACKUP_PLUGIN_URL . 'assets/css/admin-style.css',
             array(),
-            AUTO_BACKUP_VERSION
+            FLYBACKUP_VERSION
         );
         
         wp_enqueue_script(
-            'auto-backup-admin',
-            AUTO_BACKUP_PLUGIN_URL . 'assets/js/admin-script.js',
+            'flybackup-admin',
+            FLYBACKUP_PLUGIN_URL . 'assets/js/admin-script.js',
             array('wp-api-fetch', 'wp-i18n'),
-            AUTO_BACKUP_VERSION,
+            FLYBACKUP_VERSION,
             true
         );
         
-        wp_localize_script('auto-backup-admin', 'autoBackupData', array(
-            'apiUrl' => rest_url('auto-backup/v1'),
-            'nonce' => wp_create_nonce('auto_backup_nonce'),
+        wp_localize_script('flybackup-admin', 'flybackupData', array(
+            'apiUrl' => rest_url('flybackup/v1'),
+            'nonce' => wp_create_nonce('flybackup_nonce'),
             'ajaxUrl' => admin_url('admin-ajax.php'),
-            'pluginUrl' => AUTO_BACKUP_PLUGIN_URL,
-            'currentPage' => isset($_GET['page']) ? sanitize_text_field($_GET['page']) : 'auto-backup',
+            'pluginUrl' => FLYBACKUP_PLUGIN_URL,
+            'currentPage' => isset($_GET['page']) ? sanitize_text_field($_GET['page']) : 'flybackup',
             'strings' => array(
-                'confirmDelete' => __('Are you sure you want to delete this backup?', 'auto-backup'),
-                'confirmRestore' => __('Are you sure you want to restore this backup? This will overwrite your current site.', 'auto-backup'),
-                'backupInProgress' => __('Backup in progress...', 'auto-backup'),
-                'restoreInProgress' => __('Restore in progress...', 'auto-backup')
+                'confirmDelete' => __('Are you sure you want to delete this backup?', 'flybackup'),
+                'confirmRestore' => __('Are you sure you want to restore this backup? This will overwrite your current site.', 'flybackup'),
+                'backupInProgress' => __('Backup in progress...', 'flybackup'),
+                'restoreInProgress' => __('Restore in progress...', 'flybackup')
             )
         ));
     }

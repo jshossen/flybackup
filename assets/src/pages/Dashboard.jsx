@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { getStats, getHealth } from '../utils/api';
+import { getStats, getHealth, getSystemRequirements } from '../utils/api';
 import HealthMeter from '../components/HealthMeter';
 import StatCard from '../components/StatCard';
+import SystemRequirements from '../components/SystemRequirements';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const Dashboard = () => {
     const [stats, setStats] = useState(null);
     const [health, setHealth] = useState(null);
+    const [requirements, setRequirements] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -15,12 +17,14 @@ const Dashboard = () => {
 
     const loadData = async () => {
         try {
-            const [statsData, healthData] = await Promise.all([
+            const [statsData, healthData, reqData] = await Promise.all([
                 getStats(),
-                getHealth()
+                getHealth(),
+                getSystemRequirements()
             ]);
             setStats(statsData);
             setHealth(healthData);
+            setRequirements(reqData);
         } catch (error) {
             console.error('Error loading dashboard data:', error);
         } finally {
@@ -34,7 +38,7 @@ const Dashboard = () => {
 
     return (
         <div className="dashboard">
-            <h1>Auto Backup Dashboard</h1>
+            <h1>Fly Backup Dashboard</h1>
             
             <div className="dashboard-stats">
                 <StatCard
@@ -102,13 +106,18 @@ const Dashboard = () => {
                         <p>No schedules configured</p>
                     )}
                 </div>
+
+                <div className="dashboard-card full-width">
+                    <h2>System Requirements</h2>
+                    <SystemRequirements requirements={requirements} />
+                </div>
             </div>
 
             <div className="dashboard-actions">
-                <a href="?page=auto-backup-backups" className="button button-primary button-large">
+                <a href="?page=flybackup-backups" className="button button-primary button-large">
                     Create Backup
                 </a>
-                <a href="?page=auto-backup-schedules" className="button button-secondary button-large">
+                <a href="?page=flybackup-schedules" className="button button-secondary button-large">
                     Manage Schedules
                 </a>
             </div>

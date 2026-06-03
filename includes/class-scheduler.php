@@ -2,25 +2,29 @@
 /**
  * Scheduler Class
  *
- * @package Auto_Backup
+ * @package Fly_Backup
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Auto_Backup_Scheduler {
+class Fly_Backup_Scheduler {
     
     private $database;
     private $logger;
     private $backup_engine;
+    private static $hooks_registered = false;
     
     public function __construct() {
-        $this->database = new Auto_Backup_Database();
-        $this->logger = new Auto_Backup_Logger();
+        $this->database = new Fly_Backup_Database();
+        $this->logger = new Fly_Backup_Logger();
         
-        add_action('auto_backup_scheduled_backup', array($this, 'execute_scheduled_backup'));
-        add_action('auto_backup_cleanup_old_backups', array($this, 'cleanup_old_backups'));
+        if (!self::$hooks_registered) {
+            add_action('flybackup_scheduled_backup', array($this, 'execute_scheduled_backup'));
+            add_action('flybackup_cleanup_old_backups', array($this, 'cleanup_old_backups'));
+            self::$hooks_registered = true;
+        }
     }
     
     public function create_schedule($name, $frequency, $backup_type, $items = array()) {
@@ -116,10 +120,17 @@ class Auto_Backup_Scheduler {
             return;
         }
         
+        $lock_key = 'flybackup_sched_lock_' . $schedule_id;
+        if (get_transient($lock_key)) {
+            $this->logger->warning('Scheduled backup skipped: already running', $schedule_id);
+            return;
+        }
+        set_transient($lock_key, 1, 5 * MINUTE_IN_SECONDS);
+        
         $this->logger->info('Executing scheduled backup: ' . $schedule->schedule_name);
         
         if (!$this->backup_engine) {
-            $this->backup_engine = new Auto_Backup_Backup_Engine();
+            $this->backup_engine = new Fly_Backup_Backup_Engine();
         }
         
         $items = json_decode($schedule->included_items, true);
@@ -134,6 +145,8 @@ class Auto_Backup_Scheduler {
         ));
         
         $this->schedule_cron($schedule_id, $schedule->frequency, $next_run);
+        
+        delete_transient($lock_key);
         
         if ($result['success']) {
             $this->logger->success('Scheduled backup completed: ' . $schedule->schedule_name);
@@ -162,11 +175,11 @@ class Auto_Backup_Scheduler {
                 $next_run = $base_time + DAY_IN_SECONDS;
         }
         
-        return date('Y-m-d H:i:s', $next_run);
+        return gmdate('Y-m-d H:i:s', $next_run);
     }
     
     private function schedule_cron($schedule_id, $frequency, $next_run) {
-        $hook = 'auto_backup_scheduled_backup';
+        $hook = 'flybackup_scheduled_backup';
         $timestamp = strtotime($next_run);
         
         if (!wp_next_scheduled($hook, array($schedule_id))) {
@@ -180,7 +193,7 @@ class Auto_Backup_Scheduler {
     }
     
     private function unschedule_cron($schedule_id) {
-        $hook = 'auto_backup_scheduled_backup';
+        $hook = 'flybackup_scheduled_backup';
         $timestamp = wp_next_scheduled($hook, array($schedule_id));
         
         if ($timestamp) {
@@ -197,7 +210,7 @@ class Auto_Backup_Scheduler {
     }
     
     public function cleanup_old_backups() {
-        $retention_manager = new Auto_Backup_Retention_Manager();
+        $retention_manager = new Fly_Backup_Retention_Manager();
         $retention_manager->cleanup();
     }
 }

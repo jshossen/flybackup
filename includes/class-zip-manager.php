@@ -2,14 +2,14 @@
 /**
  * ZIP Manager Class
  *
- * @package Auto_Backup
+ * @package Fly_Backup
  */
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Auto_Backup_Zip_Manager {
+class Fly_Backup_Zip_Manager {
     
     private $zip;
     private $zip_path;
@@ -27,7 +27,7 @@ class Auto_Backup_Zip_Manager {
         $result = $this->zip->open($zip_path, ZipArchive::CREATE | ZipArchive::OVERWRITE);
         
         if ($result !== true) {
-            throw new Exception('Failed to create ZIP archive: ' . $zip_path);
+            throw new Exception(esc_html('Failed to create ZIP archive: ' . $zip_path));
         }
         
         return true;
@@ -40,7 +40,7 @@ class Auto_Backup_Zip_Manager {
         $result = $this->zip->open($zip_path);
         
         if ($result !== true) {
-            throw new Exception('Failed to open ZIP archive: ' . $zip_path);
+            throw new Exception(esc_html('Failed to open ZIP archive: ' . $zip_path));
         }
         
         return true;
@@ -148,7 +148,7 @@ class Auto_Backup_Zip_Manager {
             }
         }
         
-        return auto_backup_should_exclude_file($file_path);
+        return flybackup_should_exclude_file($file_path);
     }
     
     public function extract($destination) {
