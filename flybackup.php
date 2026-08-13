@@ -3,7 +3,7 @@
  * Plugin Name: FlyBackup - Auto backup manager
  * Plugin URI: https://github.com/jshossen/flybackup
  * Description: Fast, reliable WordPress backups that just work. One-click automated backups without technical complexity.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: jshossen
  * Author URI: https://jshossen.com
  * License: GPL v2 or later
@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('FLYBACKUP_VERSION', '1.0.0');
+define('FLYBACKUP_VERSION', '1.0.1');
 define('FLYBACKUP_PLUGIN_FILE', __FILE__);
 define('FLYBACKUP_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('FLYBACKUP_PLUGIN_URL', plugin_dir_url(__FILE__));

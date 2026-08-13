@@ -1,9 +1,9 @@
 === FlyBackup - Auto backup manager ===
 Contributors: jshossen
-Tags: backup, restore, database backup, wordpress backup, automatic backup, scheduled backup, site backup
+Tags: backup, restore, database backup, wordpress backup, automatic backup
 Requires at least: 5.8
-Tested up to: 7.0
-Stable tag: 1.0.0
+Tested up to: 7.1
+Stable tag: 1.0.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -200,6 +200,10 @@ Check the plugin's documentation first. For additional support, visit the WordPr
 7. Health Monitor - Backup reliability score
 
 == Changelog ==
+
+= 1.0.1 - 2026-08-13 =
+
+* ✅ WordPress 7.1 compatibility
 
 = 1.0.0 - 2026-05-24 =
 
